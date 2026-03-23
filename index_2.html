@@ -1,0 +1,2676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>outPass. — Digital Hall Passes for Schools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f0eeff;
+      --surface:   #ffffff;
+      --border:    #e0daf8;
+      --border2:   #c5bcff;
+      --text:      #14103a;
+      --muted:     #6b6490;
+      --muted2:    #9b96bb;
+      --accent:    #5b21b6;
+      --accent2:   #7c3aed;
+      --accent3:   #a78bfa;
+      --accent-bg: #f3f0ff;
+      --green:     #059669;
+      --green-bg:  #ecfdf5;
+      --green-border: #a7f3d0;
+      --yellow:    #d97706;
+      --yellow-bg: #fffbeb;
+      --yellow-border: #fde68a;
+      --red:       #dc2626;
+      --red-bg:    #fef2f2;
+      --red-border: #fca5a5;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* BLOBS */
+    .blob-wrap { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(110px); opacity: 0.35; }
+    .blob-1 { width: 640px; height: 640px; background: #c4b5fd; top: -220px; left: -200px; animation: blobf 22s ease-in-out infinite; }
+    .blob-2 { width: 420px; height: 420px; background: #a5f3fc; top: 38%; right: -120px; animation: blobf 28s ease-in-out infinite reverse; }
+    .blob-3 { width: 380px; height: 380px; background: #fde68a; bottom: -40px; left: 22%; animation: blobf 19s ease-in-out infinite 4s; }
+    @keyframes blobf { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(28px,-38px) scale(1.04)} 66%{transform:translate(-18px,28px) scale(0.97)} }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2.5rem; height: 62px;
+      background: rgba(240,238,255,0.82);
+      backdrop-filter: blur(18px) saturate(200%);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.2rem; color: var(--text); letter-spacing: -0.03em; }
+    .nav-logo span { color: var(--accent2); }
+    .nav-center { display: flex; gap: 0.15rem; background: white; border: 1px solid var(--border); border-radius: 100px; padding: 0.22rem; }
+    .nav-link { padding: 0.35rem 0.85rem; font-size: 0.81rem; font-weight: 500; color: var(--muted); text-decoration: none; border-radius: 100px; transition: all 0.15s; }
+    .nav-link:hover { color: var(--text); background: var(--bg); }
+    .nav-right { display: flex; align-items: center; gap: 0.5rem; }
+    .nav-ghost { padding: 0.4rem 0.9rem; font-size: 0.81rem; font-weight: 500; color: var(--muted); background: none; border: none; cursor: pointer; border-radius: 8px; transition: all 0.15s; font-family: inherit; }
+    .nav-ghost:hover { color: var(--text); background: white; }
+    .nav-cta { padding: 0.48rem 1.1rem; font-size: 0.81rem; font-weight: 700; background: var(--accent2); color: white; border: none; border-radius: 100px; cursor: pointer; transition: all 0.2s; font-family: inherit; box-shadow: 0 2px 10px rgba(124,58,237,0.3); }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(124,58,237,0.4); }
+
+    /* HERO */
+    .hero { position: relative; z-index: 1; padding: 128px 2rem 72px; max-width: 1140px; margin: 0 auto; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 3.5rem; align-items: center; }
+
+    .hero-tag { display: inline-flex; align-items: center; gap: 0.45rem; background: white; border: 1px solid var(--border); border-radius: 100px; padding: 0.28rem 0.85rem; font-size: 0.72rem; font-weight: 700; color: var(--accent2); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1.6rem; animation: fadeUp 0.5s ease both; }
+    .tag-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.35;transform:scale(0.65)} }
+
+    .hero-h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.7rem, 5.2vw, 4.8rem); font-weight: 700; line-height: 1.07; letter-spacing: -0.03em; margin-bottom: 1.4rem; animation: fadeUp 0.5s 0.07s ease both; }
+    .h1-grad { background: linear-gradient(128deg, var(--accent2) 0%, #a855f7 55%, #ec4899 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .h1-strike { color: var(--muted2); text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: 3px; }
+
+    .hero-sub { font-size: 1.02rem; line-height: 1.74; color: var(--muted); margin-bottom: 2.2rem; font-weight: 400; animation: fadeUp 0.5s 0.14s ease both; }
+    .hero-actions { display: flex; gap: 0.7rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.4rem; animation: fadeUp 0.5s 0.21s ease both; }
+    .hero-note { font-size: 0.76rem; color: var(--muted2); animation: fadeUp 0.5s 0.28s ease both; }
+    .hero-note b { color: var(--green); font-weight: 700; }
+
+    .btn-primary { padding: 0.72rem 1.65rem; font-size: 0.93rem; font-weight: 700; background: var(--accent2); color: white; border: none; border-radius: 100px; cursor: pointer; transition: all 0.2s; font-family: inherit; box-shadow: 0 3px 14px rgba(124,58,237,0.32); letter-spacing: -0.01em; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 7px 22px rgba(124,58,237,0.42); }
+    .btn-secondary { padding: 0.72rem 1.4rem; font-size: 0.88rem; font-weight: 600; background: white; color: var(--text); border: 1.5px solid var(--border2); border-radius: 100px; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+    .btn-secondary:hover { border-color: var(--accent2); color: var(--accent2); transform: translateY(-2px); }
+
+    /* Hero right */
+    .hero-right { animation: fadeUp 0.6s 0.18s ease both; }
+    .pass-card-wrap { background: white; border-radius: 22px; padding: 1.4rem; border: 1.5px solid var(--border); box-shadow: 0 2px 4px rgba(91,33,182,0.03), 0 20px 56px rgba(91,33,182,0.09); }
+    .pcw-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.9rem; }
+
+    .apc { background: linear-gradient(148deg, #5b21b6, #7c3aed); border-radius: 16px; padding: 1.3rem; color: white; margin-bottom: 0.9rem; position: relative; overflow: hidden; }
+    .apc::after { content: ''; position: absolute; top: -50px; right: -50px; width: 180px; height: 180px; border-radius: 50%; background: rgba(255,255,255,0.07); pointer-events: none; }
+    .apc-live { display: inline-flex; align-items: center; gap: 0.38rem; background: rgba(255,255,255,0.14); border-radius: 100px; padding: 0.2rem 0.65rem; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.85rem; }
+    .apc-live-dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; animation: pulse 1.5s ease-in-out infinite; }
+    .apc-route { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; }
+    .apc-stop { background: rgba(255,255,255,0.13); border-radius: 10px; padding: 0.45rem 0.7rem; flex: 1; text-align: center; }
+    .apc-stop-abbr { font-family: 'Space Grotesk', monospace; font-size: 1rem; font-weight: 700; display: block; margin-bottom: 0.15rem; }
+    .apc-stop-name { font-size: 0.62rem; opacity: 0.8; }
+    .apc-sep { opacity: 0.5; font-size: 0.9rem; }
+    .apc-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+    .apc-who { font-size: 0.72rem; opacity: 0.75; line-height: 1.4; }
+    .apc-who b { display: block; font-size: 0.9rem; opacity: 1; font-weight: 700; color: white; }
+    .apc-clock { text-align: right; }
+    .apc-timer { font-family: 'Space Grotesk', monospace; font-size: 1.9rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+    .apc-timer-sub { font-size: 0.6rem; opacity: 0.65; letter-spacing: 0.05em; text-transform: uppercase; margin-top: 0.15rem; }
+
+    .pq-list { display: flex; flex-direction: column; gap: 0.45rem; }
+    .pq-row { display: flex; align-items: center; gap: 0.75rem; background: var(--bg); border: 1.5px solid var(--border); border-radius: 11px; padding: 0.6rem 0.85rem; }
+    .pq-av { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 800; flex-shrink: 0; font-family: 'Space Grotesk', sans-serif; }
+    .pq-info { flex: 1; min-width: 0; }
+    .pq-name { font-size: 0.78rem; font-weight: 700; }
+    .pq-dest { font-size: 0.68rem; color: var(--muted); }
+    .pq-badge { font-size: 0.62rem; font-weight: 700; padding: 0.16rem 0.5rem; border-radius: 100px; letter-spacing: 0.03em; }
+    .b-pend { background: var(--yellow-bg); color: var(--yellow); }
+    .b-appr { background: var(--green-bg); color: var(--green); }
+
+    /* STATS */
+    .stats-wrap { position: relative; z-index: 1; max-width: 1140px; margin: 4.5rem auto 0; padding: 0 2rem; }
+    .stats-inner { display: grid; grid-template-columns: repeat(4,1fr); background: white; border: 1.5px solid var(--border); border-radius: 18px; overflow: hidden; }
+    .stat-item { padding: 2rem 1.8rem; border-right: 1.5px solid var(--border); transition: background 0.18s; }
+    .stat-item:last-child { border-right: none; }
+    .stat-item:hover { background: var(--accent-bg); }
+    .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 2.6rem; font-weight: 700; letter-spacing: -0.04em; color: var(--accent2); line-height: 1; margin-bottom: 0.4rem; display: block; }
+    .stat-label { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+    /* SECTION */
+    .section { position: relative; z-index: 1; padding: 7rem 2rem; max-width: 1140px; margin: 0 auto; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 0.4rem; background: var(--accent-bg); border: 1px solid var(--border); border-radius: 100px; padding: 0.26rem 0.8rem; font-size: 0.68rem; font-weight: 700; color: var(--accent2); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 0.9rem; }
+    .sec-h2 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.9rem, 3.3vw, 2.9rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.12; margin-bottom: 0.9rem; }
+    .sec-sub { font-size: 0.97rem; color: var(--muted); line-height: 1.7; max-width: 480px; margin-bottom: 3rem; }
+
+    /* AUDIENCE */
+    .aud-tabs { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 1.8rem; }
+    .aud-tab { padding: 0.42rem 1.05rem; border-radius: 100px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1.5px solid var(--border); color: var(--muted); background: white; transition: all 0.16s; font-family: inherit; }
+    .aud-tab.active { background: var(--accent2); color: white; border-color: var(--accent2); box-shadow: 0 3px 10px rgba(124,58,237,0.28); }
+    .aud-tab:hover:not(.active) { border-color: var(--accent2); color: var(--accent2); background: var(--accent-bg); }
+
+    .aud-panel { display: none; }
+    .aud-panel.active { display: grid; grid-template-columns: repeat(2,1fr); gap: 0.85rem; animation: fadeUp 0.28s ease; }
+
+    .aud-card { background: white; border: 1.5px solid var(--border); border-radius: 16px; padding: 1.5rem; transition: all 0.18s; }
+    .aud-card:hover { border-color: var(--accent2); transform: translateY(-3px); box-shadow: 0 6px 22px rgba(91,33,182,0.07); }
+
+    /* SVG icon system for feature cards */
+    .aud-icon-wrap { width: 36px; height: 36px; border-radius: 9px; background: var(--accent-bg); display: flex; align-items: center; justify-content: center; margin-bottom: 0.85rem; }
+    .aud-icon-wrap svg { width: 18px; height: 18px; stroke: var(--accent2); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .aud-title { font-weight: 700; font-size: 0.92rem; margin-bottom: 0.35rem; letter-spacing: -0.01em; }
+    .aud-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.65; }
+
+    /* DEMO */
+    .demo-section { position: relative; z-index: 1; padding: 0 2rem 7rem; max-width: 1140px; margin: 0 auto; }
+    .demo-header { margin-bottom: 2rem; }
+
+    .demo-shell { background: white; border: 1.5px solid var(--border); border-radius: 20px; overflow: hidden; box-shadow: 0 6px 10px rgba(91,33,182,0.03), 0 28px 72px rgba(91,33,182,0.09); }
+    .d-chrome { background: #faf9ff; border-bottom: 1.5px solid var(--border); padding: 0.75rem 1.2rem; display: flex; align-items: center; gap: 0.75rem; }
+    .d-chrome-dots { display: flex; gap: 5px; }
+    .d-chrome-dots span { width: 9px; height: 9px; border-radius: 50%; }
+    .d-chrome-dots span:nth-child(1){background:#ff5f57}
+    .d-chrome-dots span:nth-child(2){background:#febc2e}
+    .d-chrome-dots span:nth-child(3){background:#28c840}
+    .d-url { background: var(--border); border-radius: 5px; padding: 0.22rem 0.8rem; font-size: 0.7rem; color: var(--muted); }
+
+    .d-tabs { display: flex; border-bottom: 1.5px solid var(--border); padding: 0 1.2rem; background: #faf9ff; }
+    .d-tab { padding: 0.88rem 1.2rem; font-size: 0.79rem; font-weight: 600; color: var(--muted); cursor: pointer; border: none; border-bottom: 2.5px solid transparent; background: none; transition: all 0.16s; white-space: nowrap; font-family: inherit; }
+    .d-tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+    .d-tab:hover:not(.active) { color: var(--text); }
+
+    .d-body { display: grid; grid-template-columns: 196px 1fr; min-height: 490px; }
+
+    .d-sidebar { border-right: 1.5px solid var(--border); padding: 1rem 0.75rem; background: #faf9ff; display: flex; flex-direction: column; gap: 0.18rem; }
+    .d-sb-group { font-size: 0.61rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted2); padding: 0.55rem 0.7rem 0.2rem; }
+    .d-sb-item { display: flex; align-items: center; gap: 0.55rem; padding: 0.5rem 0.75rem; border-radius: 8px; cursor: pointer; font-size: 0.79rem; color: var(--muted); transition: all 0.15s; font-weight: 500; }
+    .d-sb-item:hover { background: var(--bg); color: var(--text); }
+    .d-sb-item.active { background: var(--accent-bg); color: var(--accent2); font-weight: 700; }
+    .d-sb-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
+    .d-sb-dot.active { background: var(--accent2); }
+    .d-sb-badge { margin-left: auto; background: var(--accent2); color: white; font-size: 0.57rem; font-weight: 800; border-radius: 100px; padding: 0.1rem 0.42rem; }
+
+    .d-main { padding: 1.5rem; overflow: hidden; }
+    .d-panel { display: none; }
+    .d-panel.active { display: block; animation: fadeUp 0.22s ease; }
+
+    /* TEACHER PANEL */
+    .t-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+    .t-title { font-size: 0.93rem; font-weight: 800; letter-spacing: -0.02em; }
+    .t-sub { font-size: 0.71rem; color: var(--muted); margin-top: 0.12rem; }
+    .t-approve-all { padding: 0.4rem 0.85rem; font-size: 0.74rem; font-weight: 700; background: var(--green-bg); color: var(--green); border: 1.5px solid var(--green-border); border-radius: 8px; cursor: pointer; font-family: inherit; transition: background 0.15s; white-space: nowrap; }
+    .t-approve-all:hover { background: #d1fae5; }
+
+    .chip-strip { display: flex; gap: 0.45rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .chip { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.28rem 0.7rem; border-radius: 7px; font-size: 0.7rem; font-weight: 600; border: 1.5px solid transparent; }
+    .chip-purple { background: var(--accent-bg); color: var(--accent2); border-color: var(--border); }
+    .chip-yellow { background: var(--yellow-bg); color: var(--yellow); border-color: var(--yellow-border); }
+    .chip-green  { background: var(--green-bg);  color: var(--green);  border-color: var(--green-border); }
+
+    .req-list { display: flex; flex-direction: column; gap: 0.48rem; }
+    .req-row { display: flex; align-items: center; gap: 0.85rem; padding: 0.8rem 0.95rem; border-radius: 11px; border: 1.5px solid var(--border); background: white; transition: all 0.15s; }
+    .req-row:hover { border-color: var(--border2); box-shadow: 0 2px 8px rgba(91,33,182,0.05); }
+    .r-av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 800; flex-shrink: 0; font-family: 'Space Grotesk', sans-serif; }
+    .r-info { flex: 1; min-width: 0; }
+    .r-name { font-size: 0.81rem; font-weight: 700; }
+    .r-detail { font-size: 0.69rem; color: var(--muted); margin-top: 0.06rem; }
+    .r-time { font-size: 0.67rem; color: var(--muted2); flex-shrink: 0; }
+    .r-status { font-size: 0.63rem; font-weight: 700; padding: 0.18rem 0.52rem; border-radius: 100px; flex-shrink: 0; letter-spacing: 0.03em; }
+    .s-pending  { background: var(--yellow-bg); color: var(--yellow); }
+    .s-approved { background: var(--green-bg);  color: var(--green); }
+    .s-out      { background: var(--accent-bg); color: var(--accent2); }
+    .s-denied   { background: var(--red-bg);    color: var(--red); }
+    .r-btns { display: flex; gap: 0.28rem; flex-shrink: 0; }
+    .r-btn { width: 28px; height: 28px; border-radius: 7px; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.78rem; cursor: pointer; background: white; transition: all 0.14s; font-weight: 700; }
+    .r-btn-a:hover { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
+    .r-btn-d:hover { background: var(--red-bg);   border-color: var(--red-border);   color: var(--red); }
+
+    /* STUDENT PANEL — Securly flow */
+    .stu-outer { display: grid; grid-template-columns: 1fr 230px; gap: 1.1rem; }
+
+    .sec-wrap { background: var(--bg); border: 1.5px solid var(--border); border-radius: 16px; padding: 1.3rem; }
+    .sec-step { display: none; }
+    .sec-step.active { display: block; animation: fadeUp 0.22s ease; }
+    .sec-step-title { font-size: 0.86rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em; }
+
+    /* Step 0 — name */
+    .name-form { display: flex; flex-direction: column; gap: 0.75rem; }
+    .name-input-wrap { position: relative; }
+    .name-input {
+      width: 100%; background: white; border: 1.5px solid var(--border);
+      border-radius: 11px; padding: 0.72rem 1rem; color: var(--text);
+      font-family: inherit; font-size: 0.9rem; font-weight: 500;
+      outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .name-input::placeholder { color: var(--muted2); font-weight: 400; }
+    .name-input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    .name-input.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(220,38,38,0.08); }
+    .name-error { font-size: 0.72rem; color: var(--red); font-weight: 600; display: none; }
+    .name-error.visible { display: block; }
+    .name-continue {
+      width: 100%; padding: 0.72rem; background: var(--accent2); color: white;
+      border: none; border-radius: 11px; font-family: inherit; font-weight: 700;
+      font-size: 0.88rem; cursor: pointer; transition: all 0.18s; letter-spacing: -0.01em;
+    }
+    .name-continue:hover { background: var(--accent); transform: translateY(-1px); box-shadow: 0 5px 16px rgba(124,58,237,0.32); }
+
+    /* Step 1 — class */
+    .class-list { display: flex; flex-direction: column; gap: 0.42rem; }
+    .class-row { display: flex; align-items: center; gap: 0.85rem; background: white; border: 1.5px solid var(--border); border-radius: 11px; padding: 0.75rem 0.95rem; cursor: pointer; transition: all 0.16s; }
+    .class-row:hover { border-color: var(--accent2); background: var(--accent-bg); }
+    .class-num { width: 34px; height: 34px; border-radius: 8px; background: var(--accent-bg); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-size: 0.72rem; font-weight: 700; color: var(--accent2); flex-shrink: 0; }
+    .class-info { flex: 1; }
+    .class-name { font-size: 0.81rem; font-weight: 700; }
+    .class-sub  { font-size: 0.69rem; color: var(--muted); margin-top: 0.06rem; }
+    .class-arrow { color: var(--muted2); font-size: 1rem; font-weight: 600; }
+
+    /* Step 2 — destinations */
+    .from-bar { display: flex; align-items: center; gap: 0.7rem; background: white; border: 1.5px solid var(--border); border-radius: 11px; padding: 0.68rem 0.9rem; margin-bottom: 1.1rem; }
+    .from-badge { background: var(--accent-bg); border: 1px solid var(--border); border-radius: 7px; padding: 0.25rem 0.55rem; font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; font-weight: 700; color: var(--accent2); }
+    .from-text { flex: 1; }
+    .from-label { font-size: 0.61rem; font-weight: 700; color: var(--muted2); letter-spacing: 0.06em; text-transform: uppercase; }
+    .from-name  { font-size: 0.83rem; font-weight: 700; }
+    .back-btn { font-size: 0.7rem; color: var(--muted); background: none; border: 1.5px solid var(--border); border-radius: 6px; padding: 0.2rem 0.52rem; cursor: pointer; font-family: inherit; transition: all 0.14s; }
+    .back-btn:hover { color: var(--text); border-color: var(--muted); }
+
+    .dest-heading { font-size: 0.69rem; font-weight: 700; color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 0.75rem; }
+    .dest-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.55rem; }
+    .dest-tile { background: white; border: 1.5px solid var(--border); border-radius: 13px; padding: 0.85rem 0.5rem; cursor: pointer; transition: all 0.18s; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; font-family: inherit; }
+    .dest-tile:hover { border-color: var(--accent2); background: var(--accent-bg); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(91,33,182,0.09); }
+    .dest-abbr { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; color: var(--accent2); background: var(--accent-bg); border-radius: 8px; padding: 0.3rem 0.55rem; letter-spacing: -0.01em; }
+    .dest-name { font-size: 0.7rem; font-weight: 700; color: var(--text); text-align: center; line-height: 1.3; }
+    .dest-sub  { font-size: 0.6rem; color: var(--muted); text-align: center; }
+
+    /* Step 3 — active pass */
+    .pass-active { background: white; border-radius: 15px; overflow: hidden; border: 1.5px solid var(--border); }
+    .pa-header { background: linear-gradient(138deg, #5b21b6, #7c3aed); padding: 1.4rem; color: white; text-align: center; }
+    .pa-live { display: inline-flex; align-items: center; gap: 0.38rem; background: rgba(255,255,255,0.18); border-radius: 100px; padding: 0.2rem 0.7rem; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.85rem; }
+    .pa-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: pulse 1.4s ease-in-out infinite; }
+    .pa-timer { font-family: 'Space Grotesk', monospace; font-size: 3rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1; margin-bottom: 0.25rem; }
+    .pa-timer-label { font-size: 0.67rem; opacity: 0.65; letter-spacing: 0.07em; text-transform: uppercase; }
+
+    .pa-body { padding: 1.1rem; }
+    .pa-route { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 1rem; }
+    .pa-stop { flex: 1; background: var(--bg); border: 1.5px solid var(--border); border-radius: 11px; padding: 0.75rem; text-align: center; }
+    .pa-stop-abbr { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--accent2); display: block; margin-bottom: 0.2rem; }
+    .pa-stop-type { font-size: 0.59rem; font-weight: 700; color: var(--muted2); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.12rem; }
+    .pa-stop-name { font-size: 0.75rem; font-weight: 700; }
+    .pa-arrow { color: var(--muted2); font-size: 1rem; flex-shrink: 0; }
+
+    .pa-meta { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.55rem; margin-bottom: 1rem; }
+    .pa-meta-item { background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 0.6rem 0.75rem; }
+    .pa-meta-label { font-size: 0.59rem; font-weight: 700; color: var(--muted2); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.18rem; }
+    .pa-meta-val { font-size: 0.8rem; font-weight: 700; }
+
+    .pa-end { width: 100%; padding: 0.72rem; background: var(--red); color: white; border: none; border-radius: 11px; font-family: inherit; font-size: 0.86rem; font-weight: 700; cursor: pointer; transition: all 0.18s; }
+    .pa-end:hover { background: #b91c1c; transform: translateY(-1px); }
+
+    /* History sidebar */
+    .hist-panel { }
+    .hist-label { font-size: 0.64rem; font-weight: 700; color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 0.65rem; }
+    .hist-list { display: flex; flex-direction: column; gap: 0.42rem; }
+    .hist-row { background: white; border: 1.5px solid var(--border); border-radius: 11px; padding: 0.75rem 0.88rem; }
+    .hist-dest { font-size: 0.79rem; font-weight: 700; margin-bottom: 0.22rem; }
+    .hist-meta { display: flex; justify-content: space-between; font-size: 0.67rem; color: var(--muted); }
+
+    /* ADMIN PANEL */
+    .a-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.7rem; margin-bottom: 1.05rem; }
+    .a-stat { background: var(--bg); border: 1.5px solid var(--border); border-radius: 11px; padding: 0.95rem 1.1rem; }
+    .a-stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 1.85rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1; margin-bottom: 0.22rem; }
+    .a-stat-label { font-size: 0.69rem; color: var(--muted); }
+    .a-stat-delta { font-size: 0.64rem; margin-top: 0.26rem; }
+    .d-up { color: var(--green); } .d-dn { color: var(--red); }
+
+    .a-table-wrap { border: 1.5px solid var(--border); border-radius: 11px; overflow: hidden; }
+    .a-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    .a-table th { text-align: left; padding: 0.62rem 0.88rem; background: var(--bg); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); border-bottom: 1.5px solid var(--border); font-weight: 700; }
+    .a-table td { padding: 0.62rem 0.88rem; border-bottom: 1.5px solid var(--border); }
+    .a-table tr:last-child td { border-bottom: none; }
+    .a-table tr:hover td { background: var(--bg); }
+    .td-b { font-weight: 700; } .td-m { color: var(--muted); }
+
+    /* HOW IT WORKS */
+    .how-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 5rem; align-items: start; }
+    .how-sticky { position: sticky; top: 82px; }
+    .how-steps { display: flex; flex-direction: column; }
+    .how-step { display: flex; gap: 1.3rem; padding: 1.7rem 0; border-bottom: 1.5px solid var(--border); transition: padding-left 0.22s; }
+    .how-step:first-child { padding-top: 0; }
+    .how-step:last-child { border-bottom: none; }
+    .how-step:hover { padding-left: 0.35rem; }
+    .how-num { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; background: var(--accent-bg); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.78rem; color: var(--accent2); margin-top: 0.08rem; }
+    .how-title { font-weight: 800; font-size: 0.97rem; margin-bottom: 0.38rem; letter-spacing: -0.02em; }
+    .how-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.66; }
+
+    /* TESTIMONIALS */
+    .testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.95rem; }
+    .testi-card { background: white; border: 1.5px solid var(--border); border-radius: 17px; padding: 1.7rem; transition: all 0.18s; }
+    .testi-card:hover { border-color: var(--accent2); transform: translateY(-3px); box-shadow: 0 7px 22px rgba(91,33,182,0.07); }
+    .testi-stars { display: flex; gap: 0.18rem; margin-bottom: 1rem; }
+    .testi-star { width: 13px; height: 13px; background: #f59e0b; clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%); }
+    .testi-quote { font-size: 0.86rem; line-height: 1.76; color: var(--text); margin-bottom: 1.3rem; }
+    .testi-author { display: flex; align-items: center; gap: 0.7rem; }
+    .testi-av { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; flex-shrink: 0; font-family: 'Space Grotesk', sans-serif; }
+    .testi-name { font-size: 0.81rem; font-weight: 700; }
+    .testi-role { font-size: 0.69rem; color: var(--muted); }
+
+    /* CTA */
+    .cta-section { position: relative; z-index: 1; max-width: 1140px; margin: 0 auto; padding: 0 2rem 8rem; }
+    .cta-inner { border-radius: 22px; padding: 5rem 4rem; background: linear-gradient(148deg, #4c1d95, #5b21b6, #6d28d9); display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; position: relative; overflow: hidden; }
+    .cta-inner::after { content: ''; position: absolute; right: -100px; top: -100px; width: 480px; height: 480px; border-radius: 50%; background: radial-gradient(circle, rgba(167,139,250,0.22), transparent 70%); pointer-events: none; }
+    .cta-inner::before { content: ''; position: absolute; left: -60px; bottom: -60px; width: 280px; height: 280px; border-radius: 50%; background: radial-gradient(circle, rgba(251,207,232,0.08), transparent 70%); pointer-events: none; }
+    .cta-h2 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.9rem, 3.2vw, 2.7rem); font-weight: 700; letter-spacing: -0.03em; color: white; margin-bottom: 0.7rem; line-height: 1.15; }
+    .cta-h2 em { font-style: normal; color: #c4b5fd; }
+    .cta-sub { color: rgba(255,255,255,0.58); font-size: 0.93rem; line-height: 1.66; }
+    .cta-right { display: flex; flex-direction: column; gap: 0.65rem; }
+    .cta-group { display: flex; gap: 0.55rem; }
+    .cta-input { flex: 1; background: rgba(255,255,255,0.1); border: 1.5px solid rgba(255,255,255,0.18); border-radius: 100px; padding: 0.7rem 1.15rem; color: white; font-family: inherit; font-size: 0.86rem; outline: none; transition: border-color 0.15s; }
+    .cta-input::placeholder { color: rgba(255,255,255,0.38); }
+    .cta-input:focus { border-color: rgba(255,255,255,0.48); }
+    .cta-btn { padding: 0.7rem 1.25rem; background: white; color: var(--accent2); border: none; border-radius: 100px; font-family: inherit; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: all 0.18s; white-space: nowrap; }
+    .cta-btn:hover { background: var(--accent-bg); transform: translateY(-1px); }
+    .cta-note { font-size: 0.71rem; color: rgba(255,255,255,0.38); }
+
+    /* FOOTER */
+    footer { position: relative; z-index: 1; background: white; border-top: 1.5px solid var(--border); padding: 1.7rem 2.5rem; display: flex; align-items: center; justify-content: space-between; }
+    .f-logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.98rem; letter-spacing: -0.03em; }
+    .f-logo span { color: var(--accent2); }
+    .f-copy { font-size: 0.76rem; color: var(--muted2); }
+    .f-links { display: flex; gap: 1.4rem; list-style: none; }
+    .f-links a { font-size: 0.76rem; color: var(--muted); text-decoration: none; transition: color 0.14s; }
+    .f-links a:hover { color: var(--accent2); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.58s ease, transform 0.58s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* RESPONSIVE */
+    @media (max-width: 960px) {
+      .hero { grid-template-columns: 1fr; padding: 96px 1.5rem 4rem; }
+      .hero-right { display: none; }
+      .stats-inner { grid-template-columns: repeat(2,1fr); }
+      .stat-item:nth-child(2) { border-right: none; }
+      .stat-item:nth-child(3) { border-top: 1.5px solid var(--border); border-right: none; }
+      .stat-item:nth-child(4) { border-top: 1.5px solid var(--border); }
+      .aud-panel.active { grid-template-columns: 1fr; }
+      .d-body { grid-template-columns: 1fr; }
+      .d-sidebar { display: none; }
+      .stu-outer { grid-template-columns: 1fr; }
+      .how-layout { grid-template-columns: 1fr; gap: 2rem; }
+      .how-sticky { position: static; }
+      .testi-grid { grid-template-columns: 1fr; }
+      .a-stats { grid-template-columns: repeat(2,1fr); }
+      .cta-inner { grid-template-columns: 1fr; padding: 3rem 2rem; gap: 2rem; }
+      nav { padding: 0 1.2rem; }
+      .nav-center { display: none; }
+      footer { flex-direction: column; gap: 1rem; text-align: center; }
+    }
+    /* SUCCESS SCREEN */
+    .success-card {
+      background: white; border: 1.5px solid var(--green-border);
+      border-radius: 16px; padding: 1.6rem; text-align: center;
+    }
+    .success-icon-wrap {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--green-bg); border: 2px solid var(--green-border);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1rem; animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes popIn { from{opacity:0;transform:scale(0.5)} to{opacity:1;transform:scale(1)} }
+    .success-icon { width: 26px; height: 26px; stroke: var(--green); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .success-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.3rem; color: var(--text); }
+    .success-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.2rem; line-height: 1.5; }
+    .success-summary { background: var(--bg); border: 1.5px solid var(--border); border-radius: 11px; overflow: hidden; margin-bottom: 0.2rem; }
+    .ss-row { display: flex; justify-content: space-between; align-items: center; padding: 0.62rem 0.9rem; border-bottom: 1.5px solid var(--border); }
+    .ss-row:last-child { border-bottom: none; }
+    .ss-label { font-size: 0.7rem; font-weight: 700; color: var(--muted2); letter-spacing: 0.05em; text-transform: uppercase; }
+    .ss-val { font-size: 0.82rem; font-weight: 700; color: var(--text); }
+
+    /* REVIEW SCREEN */
+    .review-wrap { }
+    .review-title { font-size: 0.92rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.3rem; }
+    .review-sub { font-size: 0.78rem; color: var(--muted); margin-bottom: 1.1rem; line-height: 1.5; }
+    .review-options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .review-opt {
+      background: white; border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 0.85rem 0.9rem; cursor: pointer; text-align: left;
+      transition: all 0.16s; font-family: inherit; display: flex; flex-direction: column; gap: 0.28rem;
+    }
+    .review-opt:hover { border-color: var(--accent2); background: var(--accent-bg); }
+    .review-opt.selected { border-color: var(--accent2); background: var(--accent-bg); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    .ro-icon { width: 10px; height: 10px; border-radius: 50%; margin-bottom: 0.2rem; }
+    .ro-green  { background: var(--green); }
+    .ro-yellow { background: var(--yellow); }
+    .ro-orange { background: #f97316; }
+    .ro-muted  { background: var(--muted2); }
+    .ro-label { font-size: 0.8rem; font-weight: 700; color: var(--text); }
+    .ro-desc  { font-size: 0.68rem; color: var(--muted); line-height: 1.4; }
+    .review-textarea {
+      width: 100%; background: white; border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 0.65rem 0.85rem;
+      font-family: inherit; font-size: 0.83rem; color: var(--text);
+      outline: none; resize: none; height: 72px; transition: border-color 0.15s;
+    }
+    .review-textarea:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(124,58,237,0.09); }
+
+    /* BLOCKED SCREEN */
+    .blocked-card {
+      background: white; border: 1.5px solid var(--red-border);
+      border-radius: 16px; padding: 1.6rem; text-align: center;
+    }
+    .blocked-icon-wrap {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--red-bg); border: 2px solid var(--red-border);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1rem; animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .blocked-icon { width: 24px; height: 24px; stroke: var(--red); fill: none; stroke-width: 2; stroke-linecap: round; }
+    .blocked-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.35rem; color: var(--red); }
+    .blocked-sub { font-size: 0.8rem; color: var(--muted); line-height: 1.6; margin-bottom: 1.1rem; }
+    .blocked-live { background: var(--red-bg); border: 1.5px solid var(--red-border); border-radius: 11px; padding: 0.85rem; text-align: left; }
+    .blocked-live-label { font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--red); margin-bottom: 0.6rem; }
+    .blocked-live-rows { display: flex; flex-direction: column; gap: 0.42rem; }
+    .blocked-live-row { display: flex; align-items: center; gap: 0.7rem; background: white; border: 1.5px solid var(--red-border); border-radius: 9px; padding: 0.55rem 0.75rem; }
+    .blr-av { width: 28px; height: 28px; border-radius: 50%; background: var(--red-bg); display: flex; align-items: center; justify-content: center; font-size: 0.64rem; font-weight: 800; color: var(--red); flex-shrink: 0; font-family: 'Space Grotesk', sans-serif; }
+    .blr-name { font-size: 0.79rem; font-weight: 700; flex: 1; }
+    .blr-dest { font-size: 0.69rem; color: var(--muted); }
+    .blr-time { font-size: 0.64rem; font-weight: 700; color: var(--red); font-family: 'Space Grotesk', monospace; }
+
+    /* DASHBOARD REVIEWS */
+    .dash-reviews-wrap {
+      margin-top: 1.2rem; border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden;
+    }
+    .dash-reviews-header {
+      background: var(--bg); border-bottom: 1.5px solid var(--border);
+      padding: 0.7rem 1rem; display: flex; justify-content: space-between; align-items: center;
+    }
+    .dash-reviews-title { font-size: 0.78rem; font-weight: 700; letter-spacing: -0.01em; }
+    .dash-reviews-sub { font-size: 0.67rem; color: var(--muted); }
+    .dash-reviews-list { display: flex; flex-direction: column; }
+    .dash-review-row {
+      display: flex; align-items: center; gap: 0.8rem;
+      padding: 0.6rem 1rem; border-bottom: 1.5px solid var(--border);
+      transition: background 0.14s;
+    }
+    .dash-review-row:last-child { border-bottom: none; }
+    .dash-review-row:hover { background: var(--bg); }
+    .dr-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dr-dot-green  { background: var(--green); }
+    .dr-dot-yellow { background: var(--yellow); }
+    .dr-dot-orange { background: #f97316; }
+    .dr-dot-muted  { background: var(--muted2); }
+    .dr-info { flex: 1; display: flex; flex-direction: column; gap: 0.05rem; min-width: 0; }
+    .dr-name { font-size: 0.79rem; font-weight: 700; }
+    .dr-dest { font-size: 0.67rem; color: var(--muted); }
+    .dr-verdict { font-size: 0.69rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 100px; white-space: nowrap; flex-shrink: 0; }
+    .dr-green  { background: var(--green-bg); color: var(--green); }
+    .dr-yellow { background: var(--yellow-bg); color: var(--yellow); }
+    .dr-orange { background: #fff7ed; color: #c2410c; }
+    .dr-muted  { background: var(--bg); color: var(--muted); }
+    .dr-time { font-size: 0.65rem; color: var(--muted2); white-space: nowrap; flex-shrink: 0; }
+
+    /* ── KIOSK UI ── */
+    .stu-outer { display: grid; grid-template-columns: 1fr 220px; gap: 1.1rem; }
+    .sec-wrap { background: white; border: 1.5px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: 0 2px 8px rgba(91,33,182,0.04); display: flex; flex-direction: column; min-height: 420px; }
+    .sec-step { display: none; flex-direction: column; flex: 1; }
+    .sec-step.active { display: flex; animation: stepIn 0.22s ease; }
+    @keyframes stepIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+    /* HOME */
+    .kiosk-home { display: flex; flex-direction: column; flex: 1; }
+    .kiosk-home-header { padding: 0.95rem 1.1rem; border-bottom: 1.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: #faf9ff; }
+    .khh-title { font-family: "Space Grotesk",sans-serif; font-size: 0.8rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+    .khh-live { display: flex; align-items: center; gap: 0.35rem; font-size: 0.7rem; color: var(--muted); }
+    .khh-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 1.8s ease-in-out infinite; }
+
+    .kiosk-active-section { padding: 0.85rem 1.1rem; flex: 1; }
+    .kas-label { font-size: 0.61rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.5rem; }
+    .kas-empty { font-size: 0.78rem; color: var(--muted2); padding: 0.5rem 0; }
+    .kas-chip { display: flex; align-items: center; gap: 0.65rem; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 0.52rem 0.75rem; margin-bottom: 0.38rem; transition: border-color 0.15s; }
+    .kas-chip:hover { border-color: var(--border2); }
+    .kas-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; animation: pulse 1.8s ease-in-out infinite; }
+    .kas-av { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.59rem; font-weight: 800; flex-shrink: 0; font-family: "Space Grotesk",sans-serif; background: var(--accent-bg); border: 1px solid var(--border2); color: var(--accent2); }
+    .kas-info { flex: 1; min-width: 0; }
+    .kas-name { font-size: 0.76rem; font-weight: 700; }
+    .kas-dest { font-size: 0.65rem; color: var(--muted); }
+    .kas-time { font-family: "Space Grotesk",monospace; font-size: 0.74rem; font-weight: 700; color: var(--accent2); flex-shrink: 0; }
+
+    .kiosk-action-grid { display: grid; grid-template-columns: 1fr 1fr; border-top: 1.5px solid var(--border); }
+    .kiosk-action-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.38rem; padding: 1rem 0.7rem; cursor: pointer; border: none; background: white; font-family: inherit; transition: background 0.15s; text-align: center; }
+    .kiosk-action-btn:first-child { border-right: 1.5px solid var(--border); }
+    .kab-out:hover { background: var(--accent-bg); }
+    .kab-in:hover  { background: var(--green-bg); }
+    .kab-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.1rem; }
+    .kab-icon-out { background: var(--accent-bg); color: var(--accent2); }
+    .kab-icon-in  { background: var(--green-bg);  color: var(--green); }
+    .kab-label { font-size: 0.82rem; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+    .kab-sub   { font-size: 0.65rem; color: var(--muted); }
+
+    /* STEP SHELL */
+    .kiosk-step-header { display: flex; align-items: center; justify-content: space-between; padding: 0.7rem 1rem; border-bottom: 1.5px solid var(--border); background: #faf9ff; flex-shrink: 0; }
+    .kiosk-back { display: flex; align-items: center; gap: 0.28rem; font-size: 0.74rem; font-weight: 600; color: var(--muted); background: none; border: none; cursor: pointer; font-family: inherit; padding: 0; transition: color 0.14s; }
+    .kiosk-back:hover { color: var(--accent2); }
+    .kiosk-progress { display: flex; gap: 0.28rem; }
+    .kp-dot { width: 18px; height: 3.5px; border-radius: 100px; background: var(--border); transition: background 0.2s; }
+    .kp-dot.active { background: var(--accent2); }
+
+    .kiosk-step-body { padding: 1rem 1.1rem; flex: 1; display: flex; flex-direction: column; gap: 0.65rem; }
+    .kiosk-step-title { font-family: "Space Grotesk",sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+    .kiosk-step-sub { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+
+    /* INPUT */
+    .kiosk-input { width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 0.65rem 0.9rem; color: var(--text); font-family: inherit; font-size: 0.87rem; font-weight: 500; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+    .kiosk-input::placeholder { color: var(--muted2); font-weight: 400; }
+    .kiosk-input:focus { border-color: var(--accent2); background: white; box-shadow: 0 0 0 3px rgba(124,58,237,0.08); }
+    .kiosk-input.error { border-color: var(--red); }
+    .kiosk-error { font-size: 0.7rem; color: var(--red); font-weight: 600; display: none; }
+    .kiosk-error.visible { display: block; }
+
+    /* BUTTONS */
+    .kiosk-primary { width: 100%; padding: 0.7rem; background: var(--accent2); color: white; border: none; border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 0.87rem; cursor: pointer; transition: all 0.18s; }
+    .kiosk-primary:hover { background: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(124,58,237,0.28); }
+    .kiosk-primary-green { background: var(--green) !important; }
+    .kiosk-primary-green:hover { background: #047857 !important; box-shadow: 0 4px 14px rgba(5,150,105,0.25) !important; }
+
+    /* CLASS LIST */
+    .kiosk-class-list { display: flex; flex-direction: column; gap: 0.38rem; }
+    .kiosk-class-row { display: flex; align-items: center; gap: 0.8rem; cursor: pointer; background: var(--bg); border: 1.5px solid var(--border); border-radius: 11px; padding: 0.68rem 0.85rem; transition: all 0.15s; }
+    .kiosk-class-row:hover { border-color: var(--accent2); background: var(--accent-bg); }
+    .kcr-room { width: 36px; height: 36px; border-radius: 8px; background: var(--accent-bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: "Space Grotesk",sans-serif; font-size: 0.7rem; font-weight: 700; color: var(--accent2); flex-shrink: 0; }
+    .kcr-info { flex: 1; }
+    .kcr-name { font-size: 0.8rem; font-weight: 700; }
+    .kcr-sub  { font-size: 0.67rem; color: var(--muted); margin-top: 0.04rem; }
+    .kcr-arrow { color: var(--muted2); flex-shrink: 0; }
+
+    /* FROM PILL */
+    .kiosk-from-pill { display: inline-flex; align-items: center; gap: 0.55rem; background: var(--bg); border: 1.5px solid var(--border); border-radius: 100px; padding: 0.3rem 0.75rem 0.3rem 0.45rem; }
+    .kfp-room { background: var(--accent2); color: white; font-family: "Space Grotesk",sans-serif; font-size: 0.68rem; font-weight: 700; border-radius: 100px; padding: 0.12rem 0.48rem; }
+    .kfp-name { font-size: 0.72rem; font-weight: 600; color: var(--accent2); }
+
+    /* DESTINATION GRID */
+    .kiosk-dest-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.48rem; }
+    .kdt { display: flex; flex-direction: column; align-items: center; gap: 0.32rem; background: white; border: 1.5px solid var(--border); border-radius: 12px; padding: 0.85rem 0.4rem; cursor: pointer; font-family: inherit; transition: all 0.18s; position: relative; text-align: center; }
+    .kdt:hover:not(.kdt-blocked) { border-color: var(--accent2); background: var(--accent-bg); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(91,33,182,0.09); }
+    .kdt-blocked { opacity: 0.45; cursor: not-allowed; background: #fff5f5; border-color: var(--red-border); pointer-events: none; }
+    .kdt-abbr { font-family: "Space Grotesk",sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--accent2); background: var(--accent-bg); border-radius: 7px; padding: 0.22rem 0.48rem; letter-spacing: -0.01em; }
+    .kdt-blocked .kdt-abbr { color: var(--red); background: var(--red-bg); }
+    .kdt-name { font-size: 0.68rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .kdt-sub  { font-size: 0.59rem; color: var(--muted); }
+    .kdt-full-badge { position: absolute; top: -6px; right: -6px; background: var(--red); color: white; font-size: 0.52rem; font-weight: 800; border-radius: 100px; padding: 0.08rem 0.38rem; letter-spacing: 0.04em; }
+
+    /* CONFIRMED */
+    .kiosk-confirmed { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.6rem; padding: 1.6rem 1.2rem; flex: 1; justify-content: center; }
+    .kiosk-check-ring { width: 58px; height: 58px; border-radius: 50%; background: var(--green-bg); border: 2px solid var(--green-border); display: flex; align-items: center; justify-content: center; color: var(--green); animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+    .kiosk-confirmed-title { font-family: "Space Grotesk",sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
+    .kiosk-confirmed-sub { font-size: 0.78rem; color: var(--muted); }
+    .kiosk-confirmed-details { width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 11px; overflow: hidden; }
+    .kcd-row { display: flex; justify-content: space-between; padding: 0.52rem 0.85rem; border-bottom: 1.5px solid var(--border); }
+    .kcd-row:last-child { border-bottom: none; }
+    .kcd-label { font-size: 0.65rem; font-weight: 700; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.05em; }
+    .kcd-val { font-size: 0.79rem; font-weight: 700; }
+    .kiosk-returning-note { font-size: 0.68rem; color: var(--muted2); }
+
+    /* FOUND PASS */
+    .kiosk-found-pass { border-radius: 13px; overflow: hidden; border: 1.5px solid var(--border); }
+    .kfp-header { background: linear-gradient(138deg,#5b21b6,#7c3aed); padding: 1.15rem; color: white; text-align: center; }
+    .kfp-live { display: inline-flex; align-items: center; gap: 0.35rem; background: rgba(255,255,255,0.16); border-radius: 100px; padding: 0.18rem 0.65rem; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.65rem; }
+    .kfp-pulse { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; animation: pulse 1.5s ease-in-out infinite; }
+    .kfp-timer { font-family: "Space Grotesk",monospace; font-size: 2.5rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1; margin-bottom: 0.2rem; }
+    .kfp-timer-label { font-size: 0.62rem; opacity: 0.65; letter-spacing: 0.07em; text-transform: uppercase; }
+    .kfp-body { padding: 0.9rem; background: white; }
+    .kfp-route { display: flex; align-items: center; gap: 0.48rem; margin-bottom: 0.7rem; }
+    .kfp-stop { flex: 1; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 0.65rem; text-align: center; }
+    .kfp-stop-abbr { font-family: "Space Grotesk",sans-serif; font-size: 0.88rem; font-weight: 700; color: var(--accent2); display: block; margin-bottom: 0.15rem; }
+    .kfp-stop-type { font-size: 0.56rem; font-weight: 700; color: var(--muted2); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.1rem; }
+    .kfp-stop-name { font-size: 0.71rem; font-weight: 700; }
+    .kfp-arrow { color: var(--muted2); flex-shrink: 0; }
+    .kfp-meta { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.42rem; margin-bottom: 0.75rem; }
+    .kfp-meta-item { background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 0.5rem 0.6rem; }
+    .kfp-meta-label { font-size: 0.56rem; font-weight: 700; color: var(--muted2); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.12rem; }
+    .kfp-meta-val { font-size: 0.76rem; font-weight: 700; }
+    .kiosk-end-pass { width: 100%; padding: 0.67rem; background: var(--red); color: white; border: none; border-radius: 9px; font-family: inherit; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.18s; }
+    .kiosk-end-pass:hover { background: #b91c1c; transform: translateY(-1px); }
+
+    /* REVIEW */
+    .kiosk-back-card { display: flex; align-items: center; gap: 0.8rem; background: var(--green-bg); border: 1.5px solid var(--green-border); border-radius: 11px; padding: 0.85rem 1rem; }
+    .kbc-check { width: 36px; height: 36px; border-radius: 50%; background: white; border: 1.5px solid var(--green-border); display: flex; align-items: center; justify-content: center; color: var(--green); flex-shrink: 0; }
+    .kbc-title { font-size: 0.86rem; font-weight: 700; }
+    .kbc-meta  { font-size: 0.69rem; color: var(--muted); margin-top: 0.08rem; }
+    .kiosk-review-section { }
+    .krs-title { font-family: "Space Grotesk",sans-serif; font-size: 0.83rem; font-weight: 700; margin-bottom: 0.2rem; letter-spacing: -0.01em; }
+    .krs-sub   { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.6rem; }
+    .krs-opts  { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+    .krs-opt { display: flex; align-items: center; gap: 0.52rem; background: var(--bg); border: 1.5px solid var(--border); border-radius: 9px; padding: 0.6rem 0.75rem; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    .krs-opt:hover { border-color: var(--accent2); background: var(--accent-bg); }
+    .krs-opt.selected { border-color: var(--accent2); background: var(--accent-bg); box-shadow: 0 0 0 3px rgba(124,58,237,0.08); }
+    .krs-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .krs-opt-label { font-size: 0.76rem; font-weight: 700; color: var(--text); }
+
+    /* HISTORY SIDEBAR */
+    .hist-panel { }
+    .hist-label { font-size: 0.62rem; font-weight: 700; color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 0.58rem; }
+    .hist-list { display: flex; flex-direction: column; gap: 0.38rem; }
+    .hist-row { background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 0.68rem 0.85rem; }
+    .hist-dest { font-size: 0.78rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .hist-meta { display: flex; justify-content: space-between; font-size: 0.66rem; color: var(--muted); }
+
+
+    /* ── KIOSK EXTRA CSS (fills gaps between HTML class names and styled rules) ── */
+
+    /* Home screen */
+    .kiosk-home { padding: 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; }
+    .kiosk-home-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.4rem; }
+    .khh-title { font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; font-weight: 700; letter-spacing: -0.01em; }
+    .khh-live  { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+    .khh-dot   { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s ease-in-out infinite; flex-shrink: 0; }
+
+    .kiosk-active-section { }
+    .kas-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted2); margin-bottom: 0.5rem; }
+    .kas-empty { font-size: 0.8rem; color: var(--muted2); padding: 0.5rem 0; }
+    .kas-chip { display: flex; align-items: center; gap: 0.65rem; background: var(--accent-bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 0.58rem 0.85rem; margin-bottom: 0.4rem; }
+    .kas-pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 1.5s ease-in-out infinite; flex-shrink: 0; }
+    .kas-av { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-bg); border: 1.5px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 0.64rem; font-weight: 800; color: var(--accent2); font-family: 'Space Grotesk', sans-serif; flex-shrink: 0; }
+    .kas-info { flex: 1; min-width: 0; }
+    .kas-name { font-size: 0.8rem; font-weight: 700; }
+    .kas-dest { font-size: 0.68rem; color: var(--muted); }
+    .kas-time { font-family: 'Space Grotesk', monospace; font-size: 0.8rem; font-weight: 700; color: var(--accent2); }
+
+    .kiosk-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
+    .kiosk-action-btn { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; background: var(--bg); border: 1.5px solid var(--border); border-radius: 13px; padding: 1.1rem 0.8rem; cursor: pointer; font-family: inherit; transition: all 0.18s; text-align: center; }
+    .kab-out:hover { border-color: var(--accent2); background: var(--accent-bg); }
+    .kab-in:hover  { border-color: var(--green); background: var(--green-bg); }
+    .kab-icon { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; }
+    .kab-icon-out { background: var(--accent-bg); color: var(--accent2); }
+    .kab-icon-in  { background: var(--green-bg);  color: var(--green); }
+    .kab-label { font-family: 'Space Grotesk', sans-serif; font-size: 0.86rem; font-weight: 700; letter-spacing: -0.01em; }
+    .kab-sub   { font-size: 0.68rem; color: var(--muted); }
+
+    /* Step chrome */
+    .kiosk-step-header { display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.1rem; border-bottom: 1.5px solid var(--border); background: #faf9ff; flex-shrink: 0; }
+    .kiosk-back { display: flex; align-items: center; gap: 0.3rem; font-size: 0.78rem; font-weight: 600; color: var(--muted); background: none; border: none; cursor: pointer; font-family: inherit; transition: color 0.15s; padding: 0; }
+    .kiosk-back:hover { color: var(--text); }
+    .kiosk-progress { display: flex; gap: 0.35rem; }
+    .kp-dot { width: 22px; height: 3px; border-radius: 100px; background: var(--border); }
+    .kp-dot.active { background: var(--accent2); }
+
+    .kiosk-step-body { padding: 1.2rem; display: flex; flex-direction: column; gap: 0.65rem; flex: 1; }
+    .kiosk-step-title { font-family: 'Space Grotesk', sans-serif; font-size: 0.97rem; font-weight: 700; letter-spacing: -0.02em; }
+    .kiosk-step-sub   { font-size: 0.78rem; color: var(--muted); margin-top: -0.15rem; }
+
+    .kiosk-input { width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 10px; padding: 0.68rem 0.95rem; font-family: inherit; font-size: 0.9rem; color: var(--text); outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+    .kiosk-input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    .kiosk-input.error { border-color: var(--red); }
+    .kiosk-error { font-size: 0.72rem; color: var(--red); font-weight: 600; display: none; }
+    .kiosk-error.visible { display: block; }
+    .kiosk-primary { width: 100%; padding: 0.72rem; background: var(--accent2); color: white; border: none; border-radius: 10px; font-family: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.18s; }
+    .kiosk-primary:hover { background: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(124,58,237,0.3); }
+    .kiosk-primary-green { background: var(--green) !important; }
+    .kiosk-primary-green:hover { background: #047857 !important; box-shadow: 0 4px 14px rgba(5,150,105,0.3) !important; }
+
+    /* Class list */
+    .kiosk-class-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .kiosk-class-row { display: flex; align-items: center; gap: 0.85rem; background: var(--bg); border: 1.5px solid var(--border); border-radius: 11px; padding: 0.72rem 0.9rem; cursor: pointer; transition: all 0.16s; font-family: inherit; width: 100%; text-align: left; }
+    .kiosk-class-row:hover { border-color: var(--accent2); background: var(--accent-bg); }
+    .kcr-room { width: 36px; height: 36px; border-radius: 8px; background: var(--accent-bg); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; font-weight: 700; color: var(--accent2); flex-shrink: 0; }
+    .kcr-info { flex: 1; }
+    .kcr-name { font-size: 0.82rem; font-weight: 700; }
+    .kcr-sub  { font-size: 0.68rem; color: var(--muted); }
+
+    /* From pill */
+    .kiosk-from-pill { display: inline-flex; align-items: center; gap: 0.55rem; background: var(--accent-bg); border: 1.5px solid var(--border); border-radius: 100px; padding: 0.26rem 0.85rem 0.26rem 0.35rem; }
+    .kfp-room { background: var(--accent2); color: white; font-family: 'Space Grotesk', sans-serif; font-size: 0.68rem; font-weight: 700; border-radius: 100px; padding: 0.1rem 0.5rem; }
+    .kfp-name { font-size: 0.76rem; font-weight: 600; color: var(--accent2); }
+
+    /* Destination grid */
+    .kiosk-dest-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.5rem; }
+    .kdt { background: white; border: 1.5px solid var(--border); border-radius: 12px; padding: 0.85rem 0.5rem 0.7rem; cursor: pointer; font-family: inherit; transition: all 0.18s; display: flex; flex-direction: column; align-items: center; gap: 0.35rem; position: relative; }
+    .kdt:not(.kdt-blocked):hover { border-color: var(--accent2); background: var(--accent-bg); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(91,33,182,0.1); }
+    .kdt.kdt-blocked { opacity: 0.42; cursor: not-allowed; }
+    .kdt-abbr { font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; font-weight: 700; border-radius: 7px; padding: 0.26rem 0.5rem; }
+    /* Abbr color variants — applied by JS */
+    .kdt-abbr.blue   { background: #dbeafe; color: #1d4ed8; }
+    .kdt-abbr.pink   { background: #fce7f3; color: #be185d; }
+    .kdt-abbr.purple { background: var(--accent-bg); color: var(--accent2); }
+    .kdt-abbr.green  { background: var(--green-bg); color: var(--green); }
+    .kdt-abbr.yellow { background: var(--yellow-bg); color: var(--yellow); }
+    .kdt-abbr.teal   { background: #e0f2fe; color: #0369a1; }
+    .kdt-name { font-size: 0.69rem; font-weight: 700; color: var(--text); text-align: center; line-height: 1.3; }
+    .kdt-sub  { font-size: 0.61rem; color: var(--muted); text-align: center; }
+    .kdt-full-badge { font-size: 0.58rem; font-weight: 700; background: var(--red-bg); color: var(--red); border-radius: 100px; padding: 0.1rem 0.45rem; letter-spacing: 0.04em; }
+
+    /* Confirmed */
+    .kiosk-confirmed { padding: 1.4rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.75rem; flex: 1; justify-content: center; }
+    .kiosk-check-ring { width: 54px; height: 54px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; flex-shrink: 0; }
+    .kiosk-confirmed-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
+    .kiosk-confirmed-sub { font-size: 0.82rem; color: var(--muted); }
+    .kiosk-confirmed-details { width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 11px; overflow: hidden; }
+    .kcd-row { display: flex; justify-content: space-between; align-items: center; padding: 0.58rem 0.9rem; border-bottom: 1.5px solid var(--border); font-size: 0.79rem; }
+    .kcd-row:last-child { border-bottom: none; }
+    .kcd-label { color: var(--muted); }
+    .kcd-val { font-weight: 700; }
+    .kiosk-returning-note { font-size: 0.7rem; color: var(--muted2); }
+
+    /* Found pass card */
+    .kiosk-found-pass { background: linear-gradient(148deg, #5b21b6, #7c3aed); border-radius: 14px; overflow: hidden; }
+    .kfp-header { padding: 1.1rem 1.2rem; text-align: center; color: white; }
+    .kfp-live { display: inline-flex; align-items: center; gap: 0.38rem; background: rgba(255,255,255,0.15); border-radius: 100px; padding: 0.18rem 0.65rem; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.6rem; }
+    .kfp-pulse { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; animation: pulse 1.5s ease-in-out infinite; }
+    .kfp-timer { font-family: 'Space Grotesk', monospace; font-size: 2.5rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1; color: white; margin-bottom: 0.2rem; }
+    .kfp-timer-label { font-size: 0.62rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.07em; }
+    .kfp-body { padding: 1rem 1.1rem; background: rgba(0,0,0,0.15); }
+    .kfp-route { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.85rem; }
+    .kfp-stop { flex: 1; background: rgba(255,255,255,0.12); border-radius: 10px; padding: 0.65rem; text-align: center; }
+    .kfp-stop-abbr { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; font-weight: 700; color: white; display: block; margin-bottom: 0.18rem; }
+    .kfp-stop-type { font-size: 0.58rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.1rem; }
+    .kfp-stop-name { font-size: 0.72rem; color: rgba(255,255,255,0.9); font-weight: 600; }
+    .kfp-arrow { color: rgba(255,255,255,0.4); flex-shrink: 0; }
+    .kfp-meta { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.4rem; margin-bottom: 0.85rem; }
+    .kfp-meta-item { background: rgba(255,255,255,0.1); border-radius: 8px; padding: 0.5rem 0.6rem; text-align: center; }
+    .kfp-meta-label { font-size: 0.57rem; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.15rem; }
+    .kfp-meta-val { font-size: 0.76rem; font-weight: 700; color: white; }
+    .kiosk-end-pass { width: 100%; padding: 0.7rem; background: white; color: var(--red); border: none; border-radius: 10px; font-family: inherit; font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: all 0.18s; }
+    .kiosk-end-pass:hover { background: var(--red); color: white; }
+
+    /* Back/returned card */
+    .kiosk-back-card { display: flex; align-items: center; gap: 0.85rem; background: var(--green-bg); border: 1.5px solid var(--green-border); border-radius: 12px; padding: 0.9rem 1rem; }
+    .kbc-check { width: 38px; height: 38px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; }
+    .kbc-title { font-family: 'Space Grotesk', sans-serif; font-size: 0.92rem; font-weight: 700; }
+    .kbc-meta  { font-size: 0.72rem; color: var(--muted); margin-top: 0.1rem; }
+
+    /* Review section */
+    .kiosk-review-section { background: var(--bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 1rem; }
+    .krs-title { font-size: 0.86rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.2rem; }
+    .krs-sub   { font-size: 0.74rem; color: var(--muted); margin-bottom: 0.8rem; }
+    .krs-opts  { display: grid; grid-template-columns: 1fr 1fr; gap: 0.42rem; }
+    .krs-opt { display: flex; align-items: center; gap: 0.52rem; background: white; border: 1.5px solid var(--border); border-radius: 9px; padding: 0.6rem 0.78rem; cursor: pointer; font-family: inherit; transition: all 0.15s; text-align: left; }
+    .krs-opt:hover { border-color: var(--accent2); background: var(--accent-bg); }
+    .krs-opt.selected { border-color: var(--accent2); background: var(--accent-bg); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    .krs-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .krs-opt-label { font-size: 0.77rem; font-weight: 600; }
+    .review-textarea { width: 100%; background: white; border: 1.5px solid var(--border); border-radius: 9px; padding: 0.6rem 0.82rem; font-family: inherit; font-size: 0.82rem; color: var(--text); outline: none; resize: none; height: 66px; transition: border-color 0.15s; }
+    .review-textarea:focus { border-color: var(--accent2); }
+
+  </style>
+</head>
+<body>
+
+  <div id="landing-wrap">
+  <div class="blob-wrap">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">outPass<span>.</span></div>
+    <div class="nav-center">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#demo" class="nav-link">Demo</a>
+      <a href="#how" class="nav-link">How it works</a>
+      <a href="#testimonials" class="nav-link">Reviews</a>
+    </div>
+    <div class="nav-right">
+      <button class="nav-ghost" onclick="openAuth('login')">Sign in</button>
+      <button class="nav-cta" onclick="openAuth('signup')">Request demo</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <div class="hero-tag"><div class="tag-dot"></div>Built for K-12 schools</div>
+      <h1 class="hero-h1">
+        Hall passes,<br>
+        <span class="h1-grad">finally digital.</span><br>
+        <span class="h1-strike">paper</span> free.
+      </h1>
+      <p class="hero-sub">Students request in seconds, teachers approve in one tap, and admins see everything in real time. No paper, no chaos, no lost slips.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="openAuth('signup')">Get started free</button>
+        <button class="btn-secondary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">See it live &rarr;</button>
+      </div>
+      <p class="hero-note"><b>Free</b> for schools under 200 students &nbsp;&middot;&nbsp; No credit card &nbsp;&middot;&nbsp; FERPA compliant</p>
+    </div>
+
+    <div class="hero-right">
+      <div class="pass-card-wrap">
+        <div class="pcw-label">Active passes right now</div>
+        <div class="apc">
+          <div class="apc-live"><div class="apc-live-dot"></div>Pass Active</div>
+          <div class="apc-route">
+            <div class="apc-stop"><span class="apc-stop-abbr">204</span><div class="apc-stop-name">Room 204</div></div>
+            <div class="apc-sep">&rarr;</div>
+            <div class="apc-stop"><span class="apc-stop-abbr">WR</span><div class="apc-stop-name">Restroom</div></div>
+          </div>
+          <div class="apc-bottom">
+            <div class="apc-who">Student<b>Jamie Martinez</b></div>
+            <div class="apc-clock">
+              <div class="apc-timer" id="hero-timer">02:34</div>
+              <div class="apc-timer-sub">elapsed</div>
+            </div>
+          </div>
+        </div>
+        <div class="pq-list">
+          <div class="pq-row">
+            <div class="pq-av" style="background:#f3f0ff;color:#5b21b6">SK</div>
+            <div class="pq-info"><div class="pq-name">Sofia Kim</div><div class="pq-dest">Library</div></div>
+            <span class="pq-badge b-pend">Pending</span>
+          </div>
+          <div class="pq-row">
+            <div class="pq-av" style="background:#ecfdf5;color:#059669">DT</div>
+            <div class="pq-info"><div class="pq-name">Dylan Thompson</div><div class="pq-dest">Nurse's office</div></div>
+            <span class="pq-badge b-appr">Approved</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-wrap reveal">
+    <div class="stats-inner">
+      <div class="stat-item"><span class="stat-num">94%</span><span class="stat-label">Reduction in unauthorized hall time</span></div>
+      <div class="stat-item"><span class="stat-num">2 min</span><span class="stat-label">Average teacher onboarding time</span></div>
+      <div class="stat-item"><span class="stat-num">100%</span><span class="stat-label">Digital — no paper passes ever needed</span></div>
+      <div class="stat-item"><span class="stat-num">Free</span><span class="stat-label">To get started for schools under 200 students</span></div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:5rem;align-items:start">
+      <div style="position:sticky;top:82px">
+        <div class="eyebrow reveal">Built for everyone</div>
+        <h2 class="sec-h2 reveal">Works for every person in the building.</h2>
+        <p class="sec-sub reveal">Students, teachers, admins, and parents — outPass is designed to make everyone's day run smoother.</p>
+        <div class="aud-tabs reveal">
+          <button class="aud-tab active" data-aud="students">Students</button>
+          <button class="aud-tab" data-aud="teachers">Teachers</button>
+          <button class="aud-tab" data-aud="admins">Admins</button>
+          <button class="aud-tab" data-aud="parents">Parents</button>
+        </div>
+      </div>
+      <div class="reveal">
+
+        <div class="aud-panel active" id="aud-students">
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 18v-4m0 0V9m0 5H7m5 0h5M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/></svg></div>
+            <div class="aud-title">Request a pass in seconds</div>
+            <div class="aud-desc">Enter your name, pick your teacher and destination. No raising your hand, no interrupting class. Your teacher is notified instantly.</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="aud-title">Approved with a live timer</div>
+            <div class="aud-desc">Once approved, your pass shows a count-up timer so everyone knows exactly how long you have been out.</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+            <div class="aud-title">See your full history</div>
+            <div class="aud-desc">Review every pass you have used — destination, date, and duration. A clear record that builds accountability naturally.</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+            <div class="aud-title">Return reminders</div>
+            <div class="aud-desc">If you have been out too long, a gentle reminder nudges you back before your teacher has to track you down.</div>
+          </div>
+        </div>
+
+        <div class="aud-panel" id="aud-teachers">
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div class="aud-title">One-tap approve or deny</div>
+            <div class="aud-desc">Requests arrive on your screen with the student's name and destination. Approve or deny without pausing your lesson.</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
+            <div class="aud-title">Live hall view</div>
+            <div class="aud-desc">See every student currently out, where they went, and how long their timer has been running — all from one screen.</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
+            <div class="aud-title">Blackout times and limits</div>
+            <div class="aud-desc">Lock passes during tests, restrict one student out at a time, or cap daily totals per student. You stay in control.</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+            <div class="aud-title">Usage patterns</div>
+            <div class="aud-desc">Spot trends over time — who leaves often and when. Useful context for parent conversations and student check-ins.</div>
+          </div>
+        </div>
+
+        <div class="aud-panel" id="aud-admins">
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+            <div class="aud-title">School-wide visibility</div>
+            <div class="aud-desc">One dashboard. Every student currently out of class across the entire building. Know exactly who is where at any moment.</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="aud-title">Replaces paper sign-outs</div>
+            <div class="aud-desc">Searchable, exportable digital records for every single pass. No more binders, loose slips, or illegible handwriting.</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="aud-title">Emergency-ready</div>
+            <div class="aud-desc">During a drill or lockdown, pull up every student's location instantly. A full timestamped trail for every movement.</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+            <div class="aud-title">Full policy control</div>
+            <div class="aud-desc">Configure destinations, set school-wide pass limits, manage teacher permissions. outPass adapts to your rules.</div>
+          </div>
+        </div>
+
+        <div class="aud-panel" id="aud-parents">
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+            <div class="aud-title">Weekly summaries</div>
+            <div class="aud-desc">Optional weekly digest: how many passes your child used, where they went, and how long they were out.</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+            <div class="aud-title">Full transparency</div>
+            <div class="aud-desc">No more guessing why your child was late back to class. outPass gives you an honest, verifiable record.</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="aud-title">Better conversations</div>
+            <div class="aud-desc">Parent-teacher meetings grounded in shared data — everyone using the same record, not conflicting memories.</div>
+          </div>
+          <div class="aud-card">
+            <div class="aud-icon-wrap"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+            <div class="aud-title">Spike alerts (optional)</div>
+            <div class="aud-desc">Opt in to be notified if your child's pass usage spikes — an early, low-pressure signal worth paying attention to.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <div class="demo-section" id="demo">
+    <div class="demo-header reveal">
+      <div class="eyebrow">Interactive demo</div>
+      <h2 class="sec-h2" style="margin-bottom:0.45rem">Try it yourself.</h2>
+      <p style="font-size:0.88rem;color:var(--muted)">Click through each tab to see outPass from every angle. Enter your name in the Student pass tab to see it appear live in the Teacher view.</p>
+    </div>
+
+    <div class="demo-shell reveal">
+      <div class="d-chrome">
+        <div class="d-chrome-dots"><span></span><span></span><span></span></div>
+        <div class="d-url">app.outpass.io &nbsp;&middot;&nbsp; Lincoln High School</div>
+      </div>
+      <div class="d-tabs">
+        <button class="d-tab active" data-tab="teacher">Teacher view</button>
+        <button class="d-tab" data-tab="student">Student pass</button>
+        <button class="d-tab" data-tab="admin">Admin dashboard</button>
+      </div>
+      <div class="d-body">
+
+        <div class="d-sidebar">
+          <div class="d-sb-group">Navigation</div>
+          <div class="d-sb-item active"><div class="d-sb-dot active"></div>Dashboard</div>
+          <div class="d-sb-item"><div class="d-sb-dot"></div>Requests <span class="d-sb-badge">3</span></div>
+          <div class="d-sb-item"><div class="d-sb-dot"></div>Live view</div>
+          <div class="d-sb-item"><div class="d-sb-dot"></div>Reports</div>
+          <div class="d-sb-group">Settings</div>
+          <div class="d-sb-item"><div class="d-sb-dot"></div>Pass limits</div>
+          <div class="d-sb-item"><div class="d-sb-dot"></div>Preferences</div>
+        </div>
+
+        <div class="d-main">
+
+          <!-- TEACHER -->
+          <div class="d-panel active" id="tab-teacher">
+            <div class="t-top">
+              <div><div class="t-title">Pass Requests &mdash; Period 3</div><div class="t-sub">Mrs. Alvarez &nbsp;&middot;&nbsp; Room 204 &nbsp;&middot;&nbsp; 10:24 AM</div></div>
+              <button class="t-approve-all" onclick="approveAll()">Approve all pending</button>
+            </div>
+            <div class="chip-strip">
+              <span class="chip chip-purple">3 out now</span>
+              <span class="chip chip-yellow">2 pending</span>
+              <span class="chip chip-green">11 today</span>
+            </div>
+            <div class="req-list" id="teacher-req-list">
+              <div class="req-row">
+                <div class="r-av" style="background:#f3f0ff;color:#5b21b6">JM</div>
+                <div class="r-info"><div class="r-name">Jamie Martinez</div><div class="r-detail">Restroom</div></div>
+                <div class="r-time">Just now</div>
+                <span class="r-status s-pending">Pending</span>
+                <div class="r-btns">
+                  <button class="r-btn r-btn-a" onclick="approvePass(this)">&#10003;</button>
+                  <button class="r-btn r-btn-d" onclick="denyPass(this)">&#10005;</button>
+                </div>
+              </div>
+              <div class="req-row">
+                <div class="r-av" style="background:#ecfdf5;color:#059669">SK</div>
+                <div class="r-info"><div class="r-name">Sofia Kim</div><div class="r-detail">Library &nbsp;&middot;&nbsp; Return book</div></div>
+                <div class="r-time">2 min ago</div>
+                <span class="r-status s-pending">Pending</span>
+                <div class="r-btns">
+                  <button class="r-btn r-btn-a" onclick="approvePass(this)">&#10003;</button>
+                  <button class="r-btn r-btn-d" onclick="denyPass(this)">&#10005;</button>
+                </div>
+              </div>
+              <div class="req-row">
+                <div class="r-av" style="background:#fffbeb;color:#d97706">DT</div>
+                <div class="r-info"><div class="r-name">Dylan Thompson</div><div class="r-detail">Nurse's office &nbsp;&middot;&nbsp; Not feeling well</div></div>
+                <div class="r-time">5 min ago</div>
+                <span class="r-status s-approved">Approved</span>
+                <div class="r-btns" style="opacity:0.28;pointer-events:none">
+                  <button class="r-btn">&#10003;</button><button class="r-btn">&#10005;</button>
+                </div>
+              </div>
+              <div class="req-row">
+                <div class="r-av" style="background:#fdf2f8;color:#db2777">AL</div>
+                <div class="r-info"><div class="r-name">Aria Lim</div><div class="r-detail">Main office &nbsp;&middot;&nbsp; Schedule change</div></div>
+                <div class="r-time">8 min ago</div>
+                <span class="r-status s-out">Out now</span>
+                <div class="r-btns" style="opacity:0.28;pointer-events:none">
+                  <button class="r-btn">&#10003;</button><button class="r-btn">&#10005;</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Teacher reviews panel -->
+            <div class="dash-reviews-wrap">
+              <div class="dash-reviews-header">
+                <div class="dash-reviews-title">Recent pass feedback</div>
+                <div class="dash-reviews-sub">From students after ending their pass</div>
+              </div>
+              <div class="dash-reviews-list" id="teacher-reviews-list">
+                <div class="dash-review-row">
+                  <div class="dr-dot dr-dot-green"></div>
+                  <div class="dr-info"><span class="dr-name">Aria Lim</span><span class="dr-dest">Main office</span></div>
+                  <div class="dr-verdict dr-green">All good</div>
+                  <div class="dr-time">8 min ago</div>
+                </div>
+                <div class="dash-review-row">
+                  <div class="dr-dot dr-dot-yellow"></div>
+                  <div class="dr-info"><span class="dr-name">Marcus Webb</span><span class="dr-dest">Library</span></div>
+                  <div class="dr-verdict dr-yellow">Took too long</div>
+                  <div class="dr-time">12 min ago</div>
+                </div>
+                <div class="dash-review-row">
+                  <div class="dr-dot dr-dot-orange"></div>
+                  <div class="dr-info"><span class="dr-name">Priya Nair</span><span class="dr-dest">Restroom</span></div>
+                  <div class="dr-verdict dr-orange">Destination issue</div>
+                  <div class="dr-time">Yesterday</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STUDENT — Shared kiosk -->
+          <div class="d-panel" id="tab-student">
+            <div class="stu-outer">
+              <div class="sec-wrap">
+
+                <!-- HOME -->
+                <div class="sec-step active" id="sec-step-home">
+                  <div class="kiosk-home">
+                    <div class="kiosk-home-header">
+                      <div class="khh-title">Room 204 &mdash; Mrs. Alvarez</div>
+                      <div class="khh-live"><div class="khh-dot"></div><span id="home-out-count">No one out</span></div>
+                    </div>
+                    <div class="kiosk-active-section">
+                      <div class="kas-label">Currently out</div>
+                      <div id="home-active-list"><div class="kas-empty">No students are currently out.</div></div>
+                    </div>
+                    <div class="kiosk-action-grid">
+                      <button class="kiosk-action-btn kab-out" onclick="goStep('signout-name')">
+                        <div class="kab-icon kab-icon-out">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        </div>
+                        <div class="kab-label">Sign Out</div>
+                        <div class="kab-sub">Request a pass</div>
+                      </button>
+                      <button class="kiosk-action-btn kab-in" onclick="goStep('signin-name')">
+                        <div class="kab-icon kab-icon-in">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                        </div>
+                        <div class="kab-label">Sign In</div>
+                        <div class="kab-sub">Return from pass</div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- SIGN OUT: name -->
+                <div class="sec-step" id="sec-step-signout-name">
+                  <div class="kiosk-step-header">
+                    <button class="kiosk-back" onclick="goStep('home')">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
+                      Back
+                    </button>
+                    <div class="kiosk-progress"><div class="kp-dot active"></div><div class="kp-dot"></div><div class="kp-dot"></div></div>
+                  </div>
+                  <div class="kiosk-step-body">
+                    <div class="kiosk-step-title">What is your name?</div>
+                    <div class="kiosk-step-sub">Enter your first and last name to get started.</div>
+                    <input class="kiosk-input" id="signout-name-input" type="text" placeholder="e.g. Alex Johnson" autocomplete="off" />
+                    <div class="kiosk-error" id="signout-name-error">Please enter your first and last name.</div>
+                    <button class="kiosk-primary" onclick="signoutSubmitName()">Continue &rarr;</button>
+                  </div>
+                </div>
+
+                <!-- SIGN OUT: class -->
+                <div class="sec-step" id="sec-step-signout-class">
+                  <div class="kiosk-step-header">
+                    <button class="kiosk-back" onclick="goStep('signout-name')">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
+                      Back
+                    </button>
+                    <div class="kiosk-progress"><div class="kp-dot active"></div><div class="kp-dot active"></div><div class="kp-dot"></div></div>
+                  </div>
+                  <div class="kiosk-step-body">
+                    <div class="kiosk-step-title" id="signout-greeting">Which class are you in?</div>
+                    <div class="kiosk-class-list">
+                      <div class="kiosk-class-row" onclick="chooseClass('alvarez','Mrs. Alvarez','Room 204 · English','204')">
+                        <div class="kcr-room">204</div>
+                        <div class="kcr-info"><div class="kcr-name">Mrs. Alvarez</div><div class="kcr-sub">English</div></div>
+                        <svg class="kcr-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><polyline points="9 18 15 12 9 6"/></svg>
+                      </div>
+                      <div class="kiosk-class-row" onclick="chooseClass('patel','Mr. Patel','Room 118 · Math','118')">
+                        <div class="kcr-room">118</div>
+                        <div class="kcr-info"><div class="kcr-name">Mr. Patel</div><div class="kcr-sub">Math</div></div>
+                        <svg class="kcr-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><polyline points="9 18 15 12 9 6"/></svg>
+                      </div>
+                      <div class="kiosk-class-row" onclick="chooseClass('chen','Ms. Chen','Room 311 · Science','311')">
+                        <div class="kcr-room">311</div>
+                        <div class="kcr-info"><div class="kcr-name">Ms. Chen</div><div class="kcr-sub">Science</div></div>
+                        <svg class="kcr-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><polyline points="9 18 15 12 9 6"/></svg>
+                      </div>
+                      <div class="kiosk-class-row" onclick="chooseClass('robinson','Mr. Robinson','Room 210 · History','210')">
+                        <div class="kcr-room">210</div>
+                        <div class="kcr-info"><div class="kcr-name">Mr. Robinson</div><div class="kcr-sub">History</div></div>
+                        <svg class="kcr-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><polyline points="9 18 15 12 9 6"/></svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- SIGN OUT: destination -->
+                <div class="sec-step" id="sec-step-signout-dest">
+                  <div class="kiosk-step-header">
+                    <button class="kiosk-back" onclick="goStep('signout-class')">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
+                      Back
+                    </button>
+                    <div class="kiosk-progress"><div class="kp-dot active"></div><div class="kp-dot active"></div><div class="kp-dot active"></div></div>
+                  </div>
+                  <div class="kiosk-step-body">
+                    <div class="kiosk-from-pill">
+                      <span class="kfp-room" id="s2-from-badge">204</span>
+                      <span class="kfp-name" id="s2-from-name">Mrs. Alvarez</span>
+                    </div>
+                    <div class="kiosk-step-title" style="margin-bottom:0">Where are you going?</div>
+                    <div class="kiosk-dest-grid" id="dest-grid-tiles"></div>
+                  </div>
+                </div>
+
+                <!-- SIGN OUT: confirmed -->
+                <div class="sec-step" id="sec-step-signout-confirmed">
+                  <div class="kiosk-confirmed">
+                    <div class="kiosk-check-ring">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div class="kiosk-confirmed-title">Pass started!</div>
+                    <div class="kiosk-confirmed-sub" id="confirmed-sub">Have a safe trip.</div>
+                    <div class="kiosk-confirmed-details">
+                      <div class="kcd-row"><span class="kcd-label">Student</span><span class="kcd-val" id="conf-name"></span></div>
+                      <div class="kcd-row"><span class="kcd-label">Going to</span><span class="kcd-val" id="conf-dest"></span></div>
+                      <div class="kcd-row"><span class="kcd-label">Teacher</span><span class="kcd-val" id="conf-teacher"></span></div>
+                    </div>
+                    <div class="kiosk-returning-note">Returning to home&hellip;</div>
+                  </div>
+                </div>
+
+                <!-- SIGN IN: name lookup -->
+                <div class="sec-step" id="sec-step-signin-name">
+                  <div class="kiosk-step-header">
+                    <button class="kiosk-back" onclick="goStep('home')">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
+                      Back
+                    </button>
+                  </div>
+                  <div class="kiosk-step-body">
+                    <div class="kiosk-step-title">Welcome back.</div>
+                    <div class="kiosk-step-sub">Type your name to find your active pass.</div>
+                    <input class="kiosk-input" id="signin-name-input" type="text" placeholder="First and last name" autocomplete="off" />
+                    <div class="kiosk-error" id="signin-name-error">No active pass found. Check spelling and try again.</div>
+                    <button class="kiosk-primary kiosk-primary-green" onclick="signinLookup()">Find my pass &rarr;</button>
+                  </div>
+                </div>
+
+                <!-- SIGN IN: found pass -->
+                <div class="sec-step" id="sec-step-signin-found">
+                  <div class="kiosk-step-header">
+                    <button class="kiosk-back" onclick="goStep('signin-name')">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
+                      Back
+                    </button>
+                  </div>
+                  <div class="kiosk-step-body" style="padding-top:0.2rem">
+                    <div class="kiosk-found-pass">
+                      <div class="kfp-header">
+                        <div class="kfp-live"><div class="kfp-pulse"></div>Pass Active</div>
+                        <div class="kfp-timer" id="signin-live-timer">0:00</div>
+                        <div class="kfp-timer-label">Time elapsed</div>
+                      </div>
+                      <div class="kfp-body">
+                        <div class="kfp-route">
+                          <div class="kfp-stop">
+                            <div class="kfp-stop-abbr" id="si-from-abbr">204</div>
+                            <div class="kfp-stop-type">From</div>
+                            <div class="kfp-stop-name" id="si-from-name">Room 204</div>
+                          </div>
+                          <svg class="kfp-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" width="16" height="16"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                          <div class="kfp-stop">
+                            <div class="kfp-stop-abbr" id="si-to-abbr">WR</div>
+                            <div class="kfp-stop-type">To</div>
+                            <div class="kfp-stop-name" id="si-to-name">Restroom</div>
+                          </div>
+                        </div>
+                        <div class="kfp-meta">
+                          <div class="kfp-meta-item"><div class="kfp-meta-label">Student</div><div class="kfp-meta-val" id="si-student"></div></div>
+                          <div class="kfp-meta-item"><div class="kfp-meta-label">Teacher</div><div class="kfp-meta-val" id="si-teacher"></div></div>
+                          <div class="kfp-meta-item"><div class="kfp-meta-label">Started</div><div class="kfp-meta-val" id="si-started"></div></div>
+                        </div>
+                        <button class="kiosk-end-pass" onclick="endPassForStudent()">End Pass &amp; Return</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- SIGN IN: review -->
+                <div class="sec-step" id="sec-step-signin-review">
+                  <div class="kiosk-step-body" style="padding-top:0.9rem">
+                    <div class="kiosk-back-card">
+                      <div class="kbc-check">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><polyline points="20 6 9 17 4 12"/></svg>
+                      </div>
+                      <div>
+                        <div class="kbc-title" id="signin-success-title">You're back!</div>
+                        <div class="kbc-meta"><span id="si-ss-dest"></span>&nbsp;&middot;&nbsp;<span id="si-ss-time"></span></div>
+                      </div>
+                    </div>
+                    <div class="kiosk-review-section">
+                      <div class="krs-title">How did your pass go?</div>
+                      <div class="krs-sub">Your response goes to your teacher.</div>
+                      <div class="krs-opts">
+                        <button class="krs-opt" data-val="all-good" onclick="selectReview(this)"><div class="krs-dot" style="background:var(--green)"></div><div class="krs-opt-label">All good</div></button>
+                        <button class="krs-opt" data-val="too-long" onclick="selectReview(this)"><div class="krs-dot" style="background:var(--yellow)"></div><div class="krs-opt-label">Took too long</div></button>
+                        <button class="krs-opt" data-val="destination-issue" onclick="selectReview(this)"><div class="krs-dot" style="background:#f97316"></div><div class="krs-opt-label">Destination issue</div></button>
+                        <button class="krs-opt" data-val="other" onclick="selectReview(this)"><div class="krs-dot" style="background:var(--muted2)"></div><div class="krs-opt-label">Something else</div></button>
+                      </div>
+                      <div id="review-note-wrap" style="display:none;margin-top:0.55rem">
+                        <textarea class="review-textarea" id="review-note" placeholder="Tell us what happened..."></textarea>
+                      </div>
+                      <button class="kiosk-primary kiosk-primary-green" id="review-submit-btn" style="display:none;margin-top:0.6rem" onclick="submitReview()">Submit &rarr;</button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <div>
+                <div class="hist-label">Recent passes</div>
+                <div class="hist-list" id="hist-list">
+                  <div class="hist-row"><div class="hist-dest">Boys Restroom</div><div class="hist-meta"><span>Today, 8:52 AM</span><span style="color:var(--green)">4 min</span></div></div>
+                  <div class="hist-row"><div class="hist-dest">Library</div><div class="hist-meta"><span>Yesterday</span><span style="color:var(--green)">9 min</span></div></div>
+                  <div class="hist-row"><div class="hist-dest">Nurse's Office</div><div class="hist-meta"><span>Mon</span><span style="color:var(--yellow)">18 min</span></div></div>
+                  <div class="hist-row"><div class="hist-dest">Main Office</div><div class="hist-meta"><span>Mon</span><span style="color:var(--green)">6 min</span></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ADMIN -->
+          <div class="d-panel" id="tab-admin">
+            <div class="t-top" style="margin-bottom:1rem">
+              <div><div class="t-title">School Overview</div><div class="t-sub">Lincoln High School &nbsp;&middot;&nbsp; Thu Mar 19 &nbsp;&middot;&nbsp; 10:24 AM</div></div>
+            </div>
+            <div class="a-stats">
+              <div class="a-stat"><div class="a-stat-num" style="color:var(--accent2)">14</div><div class="a-stat-label">Students currently out</div><div class="a-stat-delta d-dn">3 fewer than yesterday</div></div>
+              <div class="a-stat"><div class="a-stat-num" style="color:var(--green)">187</div><div class="a-stat-label">Passes issued today</div><div class="a-stat-delta d-up">12% above average</div></div>
+              <div class="a-stat"><div class="a-stat-num">6.2</div><div class="a-stat-label">Avg. minutes per pass</div><div class="a-stat-delta d-up">0.8 min improvement</div></div>
+            </div>
+            <div class="a-table-wrap">
+              <table class="a-table" id="admin-table">
+                <thead><tr><th>Student</th><th>Destination</th><th>Teacher</th><th>Left at</th><th>Duration</th><th>Status</th></tr></thead>
+                <tbody id="admin-tbody">
+                  <tr><td class="td-b">Aria Lim</td><td>Main office</td><td class="td-m">Mrs. Alvarez</td><td class="td-m">10:16 AM</td><td class="td-m">8 min</td><td><span class="r-status s-out">Out now</span></td></tr>
+                  <tr><td class="td-b">Marcus Webb</td><td>Library</td><td class="td-m">Mr. Patel</td><td class="td-m">10:09 AM</td><td class="td-m">15 min</td><td><span class="r-status s-denied">Overdue</span></td></tr>
+                  <tr><td class="td-b">Sofia Kim</td><td>Restroom</td><td class="td-m">Mrs. Alvarez</td><td class="td-m">10:22 AM</td><td class="td-m">2 min</td><td><span class="r-status s-out">Out now</span></td></tr>
+                  <tr><td class="td-b">Dylan Thompson</td><td>Nurse's office</td><td class="td-m">Mrs. Alvarez</td><td class="td-m">10:19 AM</td><td class="td-m">5 min</td><td><span class="r-status s-approved">Approved</span></td></tr>
+                  <tr><td class="td-b">Jamie Martinez</td><td>Restroom</td><td class="td-m">Ms. Chen</td><td class="td-m">10:02 AM</td><td class="td-m">&mdash;</td><td><span class="r-status s-pending">Pending</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Admin reviews panel -->
+            <div class="dash-reviews-wrap">
+              <div class="dash-reviews-header">
+                <div class="dash-reviews-title">Student feedback &mdash; school wide</div>
+                <div class="dash-reviews-sub">Submitted after each pass is closed</div>
+              </div>
+              <div class="dash-reviews-list" id="admin-reviews-list">
+                <div class="dash-review-row">
+                  <div class="dr-dot dr-dot-green"></div>
+                  <div class="dr-info"><span class="dr-name">Aria Lim</span><span class="dr-dest">Main office &middot; Mrs. Alvarez</span></div>
+                  <div class="dr-verdict dr-green">All good</div>
+                  <div class="dr-time">8 min ago</div>
+                </div>
+                <div class="dash-review-row">
+                  <div class="dr-dot dr-dot-yellow"></div>
+                  <div class="dr-info"><span class="dr-name">Marcus Webb</span><span class="dr-dest">Library &middot; Mr. Patel</span></div>
+                  <div class="dr-verdict dr-yellow">Took too long</div>
+                  <div class="dr-time">12 min ago</div>
+                </div>
+                <div class="dash-review-row">
+                  <div class="dr-dot dr-dot-orange"></div>
+                  <div class="dr-info"><span class="dr-name">Priya Nair</span><span class="dr-dest">Restroom &middot; Ms. Chen</span></div>
+                  <div class="dr-verdict dr-orange">Destination issue</div>
+                  <div class="dr-time">Yesterday</div>
+                </div>
+                <div class="dash-review-row">
+                  <div class="dr-dot dr-dot-green"></div>
+                  <div class="dr-info"><span class="dr-name">Sofia Kim</span><span class="dr-dest">Library &middot; Mrs. Alvarez</span></div>
+                  <div class="dr-verdict dr-green">All good</div>
+                  <div class="dr-time">Yesterday</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how">
+    <div class="how-layout">
+      <div class="how-sticky">
+        <div class="eyebrow reveal">How it works</div>
+        <h2 class="sec-h2 reveal">Up and running this afternoon.</h2>
+        <p class="sec-sub reveal">No IT ticket. No lengthy setup. Most schools are live before the bell rings.</p>
+        <button class="btn-primary reveal" style="margin-top:0.5rem" onclick="openAuth('signup')">Get started free &rarr;</button>
+      </div>
+      <div class="how-steps reveal">
+        <div class="how-step">
+          <div class="how-num">01</div>
+          <div><div class="how-title">School sets up in minutes</div><div class="how-desc">Import your roster via Google Classroom, Clever, or CSV. Add teachers, set destinations and pass limits. Done in under an hour — no IT department required.</div></div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">02</div>
+          <div><div class="how-title">Students enter their name and request</div><div class="how-desc">From any device, students type their name, pick their teacher, and tap a destination. No dropdown for estimated time — just quick, honest information.</div></div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">03</div>
+          <div><div class="how-title">Teachers approve in one tap</div><div class="how-desc">A notification arrives with the student's name and destination. One tap to approve or deny. The pass activates with a live count-up timer, and everything is logged automatically.</div></div>
+        </div>
+        <div class="how-step">
+          <div class="how-num">04</div>
+          <div><div class="how-title">Admins see the full picture</div><div class="how-desc">A live school-wide dashboard, daily summaries, and exportable records — all named and timestamped. Paper sign-out sheets are gone for good.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section" id="testimonials" style="padding-top:0">
+    <div class="eyebrow reveal">What schools say</div>
+    <h2 class="sec-h2 reveal" style="margin-bottom:2.5rem">Loved by staff and students.</h2>
+    <div class="testi-grid reveal">
+      <div class="testi-card">
+        <div class="testi-stars"><div class="testi-star"></div><div class="testi-star"></div><div class="testi-star"></div><div class="testi-star"></div><div class="testi-star"></div></div>
+        <p class="testi-quote">"We eliminated 100% of our paper sign-out sheets in week one. I can see who is in the hall without leaving my classroom. It has genuinely changed how I teach."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:#f3f0ff;color:#5b21b6">SA</div>
+          <div><div class="testi-name">Sandra Alvarez</div><div class="testi-role">10th Grade English &nbsp;&middot;&nbsp; Lincoln High School</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars"><div class="testi-star"></div><div class="testi-star"></div><div class="testi-star"></div><div class="testi-star"></div><div class="testi-star"></div></div>
+        <p class="testi-quote">"In a lockdown drill, I knew exactly where every student was in under 30 seconds. No other system comes close to that. I would never go back to paper."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:#ecfdf5;color:#059669">MR</div>
+          <div><div class="testi-name">Marcus Reid</div><div class="testi-role">Principal &nbsp;&middot;&nbsp; Westview Middle School</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars"><div class="testi-star"></div><div class="testi-star"></div><div class="testi-star"></div><div class="testi-star"></div><div class="testi-star"></div></div>
+        <p class="testi-quote">"My son was skipping class and I had no idea. The weekly outPass summary made it visible early. I wish every school used this — it is a real game changer for parents."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:#fffbeb;color:#d97706">LK</div>
+          <div><div class="testi-name">Laura Kim</div><div class="testi-role">Parent &nbsp;&middot;&nbsp; Jefferson Elementary</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-inner reveal">
+      <div>
+        <h2 class="cta-h2">Ready to ditch the <em>paper slips?</em></h2>
+        <p class="cta-sub">Get your school set up and running before the end of the week. It is simpler than you think.</p>
+      </div>
+      <div class="cta-right">
+        <div class="cta-group">
+          <input class="cta-input" type="email" placeholder="your@school.edu" />
+          <button class="cta-btn" onclick="openAuth('signup')">Get started</button>
+        </div>
+        <p class="cta-note">Free under 200 students &nbsp;&middot;&nbsp; FERPA compliant &nbsp;&middot;&nbsp; No credit card</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="f-logo">outPass<span>.</span></div>
+    <p class="f-copy">&copy; 2026 outPass. All rights reserved.</p>
+    <ul class="f-links">
+      <li><a href="#">Privacy</a></li>
+      <li><a href="#">Terms</a></li>
+      <li><a href="#">FERPA</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+  </footer>
+  </div><!-- end landing-wrap -->
+    const io = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          e.target.style.transitionDelay = (i * 0.055) + 's';
+          e.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.07 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // AUDIENCE TABS
+    document.querySelectorAll('.aud-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.aud-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.aud-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('aud-' + tab.dataset.aud).classList.add('active');
+      });
+    });
+
+    // DEMO TABS
+    document.querySelectorAll('.d-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.d-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.d-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        if (tab.dataset.tab === 'student') { updateHome(); goStep('home'); }
+      });
+    });
+
+    // SIDEBAR
+    document.querySelectorAll('.d-sb-item').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.d-sb-item').forEach(i => { i.classList.remove('active'); i.querySelector('.d-sb-dot')?.classList.remove('active'); });
+        item.classList.add('active');
+        item.querySelector('.d-sb-dot')?.classList.add('active');
+      });
+    });
+
+    // TEACHER ACTIONS
+    function approvePass(btn) {
+      const row = btn.closest('.req-row');
+      row.querySelector('.r-status').className = 'r-status s-approved';
+      row.querySelector('.r-status').textContent = 'Approved';
+      row.querySelector('.r-btns').style.cssText = 'opacity:0.25;pointer-events:none;display:flex;gap:0.28rem';
+    }
+    function denyPass(btn) {
+      const row = btn.closest('.req-row');
+      row.querySelector('.r-status').className = 'r-status s-denied';
+      row.querySelector('.r-status').textContent = 'Denied';
+      row.querySelector('.r-btns').style.cssText = 'opacity:0.25;pointer-events:none;display:flex;gap:0.28rem';
+      row.style.opacity = '0.48';
+    }
+    function approveAll() {
+      document.querySelectorAll('.r-status.s-pending').forEach(s => {
+        s.className = 'r-status s-approved'; s.textContent = 'Approved';
+        s.closest('.req-row').querySelector('.r-btns').style.cssText = 'opacity:0.25;pointer-events:none;display:flex;gap:0.28rem';
+      });
+    }
+
+    // ── STUDENT KIOSK FLOW ──
+
+    // Destination config: id, abbr, name, location, color class
+    const DESTINATIONS = [
+      { id:'boys-wc',  abbr:'BWC', name:'Boys Restroom',  loc:'B Hallway', color:'blue',   max:2 },
+      { id:'girls-wc', abbr:'GWC', name:'Girls Restroom', loc:'B Hallway', color:'pink',   max:2 },
+      { id:'library',  abbr:'LIB', name:'Library',        loc:'Room 120',  color:'purple', max:2 },
+      { id:'nurse',    abbr:'RN',  name:"Nurse's Office", loc:'Room 101',  color:'green',  max:2 },
+      { id:'office',   abbr:'OFF', name:'Main Office',    loc:'Room 100',  color:'yellow', max:2 },
+      { id:'water',    abbr:'H2O', name:'Water Fountain', loc:'B Hallway', color:'teal',   max:2 },
+    ];
+
+    const teacherMap = { alvarez:'Mrs. Alvarez', patel:'Mr. Patel', chen:'Ms. Chen', robinson:'Mr. Robinson' };
+
+    // Global state
+    let activePasses = [];
+    let passTimers   = {};
+    let signoutName  = '';
+    let signoutClass = { id:'', name:'', room:'', num:'' };
+    let signinPassRef = null;
+    let selectedReview = '';
+
+    function goStep(id) {
+      document.querySelectorAll('.sec-step').forEach(s => s.classList.remove('active'));
+      const el = document.getElementById('sec-step-' + id);
+      if (el) el.classList.add('active');
+    }
+
+    function timerKey(nl) { return nl.replace(/\s/g,'_'); }
+    function formatTime(sec) { return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0'); }
+    function countAtDest(id) { return activePasses.filter(p => p.destId === id).length; }
+
+    function buildDestGrid() {
+      const grid = document.getElementById('dest-grid-tiles');
+      if (!grid) return;
+      grid.innerHTML = '';
+      DESTINATIONS.forEach(d => {
+        const used = countAtDest(d.id);
+        const full = used >= d.max;
+        const btn = document.createElement('button');
+        btn.className = 'kdt' + (full ? ' kdt-blocked' : '');
+        btn.disabled = full;
+        if (!full) btn.onclick = () => chooseDest(d.id, d.abbr, d.name, d.loc);
+        btn.innerHTML = `
+          <div class="kdt-abbr ${d.color}">${d.abbr}</div>
+          <div class="kdt-name">${d.name}</div>
+          <div class="kdt-sub">${d.loc}</div>
+          <div class="kdt-cap ${full ? 'kdt-full-badge' : ''}">${used}/${d.max}${full ? ' Full' : ''}</div>`;
+        grid.appendChild(btn);
+      });
+    }
+
+    function updateHome() {
+      const listEl = document.getElementById('home-active-list');
+      const subEl  = document.getElementById('home-out-count');
+      const count  = activePasses.length;
+      subEl.textContent = count === 0 ? 'No one out'
+        : count === 1 ? '1 student out'
+        : count + ' students out';
+      listEl.innerHTML = '';
+      if (count === 0) {
+        listEl.innerHTML = '<div class="kas-empty">No students are currently out.</div>';
+      } else {
+        activePasses.forEach(p => {
+          const initials = p.name.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);
+          const div = document.createElement('div');
+          div.className = 'kas-chip';
+          div.innerHTML = `
+            <div class="kas-pulse"></div>
+            <div class="kas-av">${initials}</div>
+            <div class="kas-info"><div class="kas-name">${p.name}</div><div class="kas-dest">${p.dest}</div></div>
+            <div class="kas-time" id="kas-t-${timerKey(p.nameLower)}">${formatTime(p.elapsed)}</div>`;
+          listEl.appendChild(div);
+        });
+      }
+      const chip = document.querySelector('.chip.chip-purple');
+      if (chip) chip.textContent = count + ' out now';
+    }
+
+    // SIGN OUT
+    function signoutSubmitName() {
+      const input = document.getElementById('signout-name-input');
+      const err   = document.getElementById('signout-name-error');
+      const val   = input.value.trim();
+      if (!val || val.split(' ').filter(Boolean).length < 2) {
+        input.classList.add('error'); err.classList.add('visible'); return;
+      }
+      if (activePasses.find(p => p.nameLower === val.toLowerCase())) {
+        input.classList.add('error');
+        err.textContent = 'You already have an active pass. Use Sign In to end it.';
+        err.classList.add('visible'); return;
+      }
+      input.classList.remove('error'); err.classList.remove('visible');
+      err.textContent = 'Please enter your first and last name.';
+      signoutName = val;
+      const first = val.split(' ')[0];
+      document.getElementById('signout-greeting').textContent = 'Hi ' + first + ', which class are you in?';
+      goStep('signout-class');
+    }
+
+    document.getElementById('signout-name-input').addEventListener('keydown', e => { if (e.key==='Enter') signoutSubmitName(); });
+
+    function chooseClass(id, name, room, num) {
+      signoutClass = { id, name, room, num };
+      document.getElementById('s2-from-badge').textContent = num;
+      document.getElementById('s2-from-name').textContent = name;
+      buildDestGrid();
+      goStep('signout-dest');
+    }
+
+    function chooseDest(destId, abbr, destName, loc) {
+      if (countAtDest(destId) >= 2) return;
+      const teacher   = teacherMap[signoutClass.id] || signoutClass.name;
+      const now       = new Date();
+      const startedAt = now.toLocaleTimeString('en-US', {hour:'numeric',minute:'2-digit'});
+      const nl        = signoutName.toLowerCase();
+      const passRef   = { name:signoutName, nameLower:nl, destId, destAbbr:abbr, dest:destName,
+                          classId:signoutClass.id, classNum:signoutClass.num, classRoom:signoutClass.room,
+                          teacher, startedAt, elapsed:0 };
+      activePasses.push(passRef);
+
+      const key = timerKey(nl);
+      passTimers[key] = setInterval(() => {
+        passRef.elapsed++;
+        const el = document.getElementById('kas-t-' + key);
+        if (el) el.textContent = formatTime(passRef.elapsed);
+        if (signinPassRef && signinPassRef.nameLower === nl) {
+          const lt = document.getElementById('signin-live-timer');
+          if (lt) lt.textContent = formatTime(passRef.elapsed);
+        }
+      }, 1000);
+
+      addLivePassToTeacher(signoutName, destName, signoutClass.num);
+      addToAdminTable(signoutName, destName, signoutClass.id, nl);
+
+      // Fill confirmed card
+      document.getElementById('conf-name').textContent    = signoutName;
+      document.getElementById('conf-dest').textContent    = destName;
+      document.getElementById('conf-teacher').textContent = teacher;
+      document.getElementById('confirmed-sub').textContent = 'Have a safe trip, ' + signoutName.split(' ')[0] + '.';
+
+      const savedName = signoutName;
+      signoutName = '';
+      document.getElementById('signout-name-input').value = '';
+
+      goStep('signout-confirmed');
+      setTimeout(() => { updateHome(); goStep('home'); }, 2000);
+    }
+
+    // SIGN IN
+    function signinLookup() {
+      const input = document.getElementById('signin-name-input');
+      const err   = document.getElementById('signin-name-error');
+      const val   = input.value.trim().toLowerCase();
+      const found = activePasses.find(p => p.nameLower === val);
+      if (!found) { input.classList.add('error'); err.classList.add('visible'); return; }
+      input.classList.remove('error'); err.classList.remove('visible');
+      signinPassRef = found;
+
+      document.getElementById('si-from-abbr').textContent = found.classNum;
+      document.getElementById('si-from-name').textContent = found.classRoom.split(' \u00b7 ')[0];
+      document.getElementById('si-to-abbr').textContent   = found.destAbbr;
+      document.getElementById('si-to-name').textContent   = found.dest;
+      document.getElementById('si-student').textContent   = found.name;
+      document.getElementById('si-teacher').textContent   = found.teacher;
+      document.getElementById('si-started').textContent   = found.startedAt;
+      document.getElementById('signin-live-timer').textContent = formatTime(found.elapsed);
+
+      input.value = '';
+      goStep('signin-found');
+    }
+
+    document.getElementById('signin-name-input').addEventListener('keydown', e => { if (e.key==='Enter') signinLookup(); });
+
+    function endPassForStudent() {
+      if (!signinPassRef) return;
+      const p = signinPassRef;
+      const key = timerKey(p.nameLower);
+      if (passTimers[key]) { clearInterval(passTimers[key]); delete passTimers[key]; }
+
+      // Update admin table
+      document.querySelectorAll('#admin-tbody tr[data-student="'+p.nameLower+'"]').forEach(tr => {
+        const s = tr.querySelector('.r-status');
+        if (s) { s.className='r-status s-approved'; s.textContent='Returned'; }
+        const cells = tr.querySelectorAll('td');
+        if (cells[4]) cells[4].textContent = formatTime(p.elapsed);
+      });
+
+      activePasses = activePasses.filter(x => x.nameLower !== p.nameLower);
+      updateHome();
+
+      // Fill review header
+      document.getElementById('signin-success-title').textContent = 'Welcome back, ' + p.name.split(' ')[0] + '!';
+      document.getElementById('si-ss-dest').textContent = p.dest;
+      document.getElementById('si-ss-time').textContent = formatTime(p.elapsed);
+
+      goStep('signin-review');
+    }
+
+    // REVIEW
+    function selectReview(btn) {
+      document.querySelectorAll('.krs-opt').forEach(o => o.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedReview = btn.dataset.val;
+      const noteWrap = document.getElementById('review-note-wrap');
+      noteWrap.style.display = (selectedReview==='other'||selectedReview==='destination-issue') ? 'block' : 'none';
+      document.getElementById('review-submit-btn').style.display = 'block';
+    }
+
+    const reviewLabels = {
+      'all-good':{'label':'All good','css':'dr-green','dotCss':'dr-dot-green'},
+      'too-long':{'label':'Took too long','css':'dr-yellow','dotCss':'dr-dot-yellow'},
+      'destination-issue':{'label':'Destination issue','css':'dr-orange','dotCss':'dr-dot-orange'},
+      'other':{'label':'Something else','css':'dr-muted','dotCss':'dr-dot-muted'}
+    };
+
+    function postReviewToDashboards(name, dest, teacher, verdict, note) {
+      const rl = reviewLabels[verdict] || reviewLabels['other'];
+      const noteStr = note ? ' \u2014 ' + note : '';
+      function buildRow(destStr) {
+        const row = document.createElement('div');
+        row.className = 'dash-review-row'; row.style.cssText='opacity:0;transition:opacity 0.4s ease';
+        row.innerHTML = `<div class="dr-dot ${rl.dotCss}"></div><div class="dr-info"><span class="dr-name">${name}</span><span class="dr-dest">${destStr}${noteStr}</span></div><div class="dr-verdict ${rl.css}">${rl.label}</div><div class="dr-time">Just now</div>`;
+        return row;
+      }
+      const tRow = buildRow(dest);
+      const aRow = buildRow(dest + ' \u00b7 ' + teacher);
+      document.getElementById('teacher-reviews-list').prepend(tRow);
+      document.getElementById('admin-reviews-list').prepend(aRow);
+      requestAnimationFrame(() => { tRow.style.opacity='1'; aRow.style.opacity='1'; });
+    }
+
+    function submitReview() {
+      const note = (document.getElementById('review-note').value||'').trim();
+      if (signinPassRef) postReviewToDashboards(signinPassRef.name, signinPassRef.dest, signinPassRef.teacher, selectedReview, note);
+
+      // Flash thanks then go home
+      const reviewSect = document.querySelector('#sec-step-signin-review .kiosk-review-section');
+      const orig = reviewSect.innerHTML;
+      reviewSect.innerHTML = `<div style="text-align:center;padding:1rem 0">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--green-bg);border:2px solid var(--green-border);display:flex;align-items:center;justify-content:center;margin:0 auto 0.7rem;color:var(--green)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div style="font-family:Space Grotesk,sans-serif;font-size:0.95rem;font-weight:700;margin-bottom:0.3rem">Thanks!</div>
+        <div style="font-size:0.75rem;color:var(--muted)">Feedback sent to your teacher.</div>
+      </div>`;
+      setTimeout(() => {
+        signinPassRef = null; selectedReview = '';
+        document.getElementById('signin-name-input').value = '';
+        document.getElementById('review-note').value = '';
+        document.querySelectorAll('.krs-opt').forEach(o => o.classList.remove('selected'));
+        document.getElementById('review-note-wrap').style.display = 'none';
+        document.getElementById('review-submit-btn').style.display = 'none';
+        reviewSect.innerHTML = orig;
+        reviewSect.querySelectorAll('.krs-opt').forEach(btn => { btn.onclick = function(){ selectReview(this); }; });
+        document.getElementById('review-submit-btn').onclick = submitReview;
+        goStep('home');
+      }, 1800);
+    }
+
+    // TEACHER / ADMIN HELPERS
+    function addLivePassToTeacher(name, dest, room) {
+      const list = document.getElementById('teacher-req-list');
+      const initials = name.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);
+      const colors = ['background:#f3f0ff;color:#5b21b6','background:#ecfdf5;color:#059669','background:#fdf2f8;color:#db2777','background:#fff7ed;color:#c2410c'];
+      const color = colors[Math.floor(Math.random()*colors.length)];
+      const row = document.createElement('div');
+      row.className = 'req-row'; row.style.borderColor = 'var(--accent2)';
+      row.innerHTML = `<div class="r-av" style="${color}">${initials}</div><div class="r-info"><div class="r-name">${name}</div><div class="r-detail">${dest}</div></div><div class="r-time">Just now</div><span class="r-status s-pending">Pending</span><div class="r-btns"><button class="r-btn r-btn-a" onclick="approvePass(this)">&#10003;</button><button class="r-btn r-btn-d" onclick="denyPass(this)">&#10005;</button></div>`;
+      list.prepend(row);
+      row.style.opacity='0'; row.style.transform='translateY(-8px)';
+      requestAnimationFrame(() => {
+        row.style.transition='opacity 0.3s ease, transform 0.3s ease, border-color 1.5s ease';
+        row.style.opacity='1'; row.style.transform='translateY(0)';
+        setTimeout(()=>{ row.style.borderColor='var(--border)'; }, 1500);
+      });
+    }
+
+    function addToAdminTable(name, dest, classId, nameLower) {
+      const tbody = document.getElementById('admin-tbody');
+      const teacher = teacherMap[classId]||'Unknown';
+      const now = new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-student', nameLower);
+      tr.innerHTML = `<td class="td-b" style="color:var(--accent2)">${name}</td><td>${dest}</td><td class="td-m">${teacher}</td><td class="td-m">${now}</td><td class="td-m">0 min</td><td><span class="r-status s-out">Out now</span></td>`;
+      tbody.prepend(tr);
+    }
+
+        // HERO TIMER
+    let heroSec = 154;
+    setInterval(() => {
+      heroSec++;
+      const m = Math.floor(heroSec / 60);
+      const s = String(heroSec % 60).padStart(2, '0');
+      document.getElementById('hero-timer').textContent = String(m).padStart(2,'0') + ':' + s;
+    }, 1000);
+
+    // CTA
+    function ctaSubmit(btn) {
+      const orig = btn.textContent;
+      btn.textContent = 'Done!';
+      btn.style.background = '#d1fae5'; btn.style.color = '#065f46';
+      setTimeout(() => { btn.textContent = orig; btn.style.background = ''; btn.style.color = ''; }, 2500);
+    }
+  </script>
+  <!-- AUTH MODAL -->
+  <div class="auth-overlay" id="auth-overlay" onclick="closeAuthIfBg(event)">
+    <div class="auth-modal" id="auth-modal">
+
+      <!-- Close button -->
+      <button class="auth-close" onclick="closeAuth()" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+
+      <!-- Left panel — branding -->
+      <div class="auth-left">
+        <div class="auth-left-inner">
+          <div class="auth-brand">
+            <div class="auth-brand-logo">outPass<span>.</span></div>
+            <div class="auth-brand-tag">Digital hall passes for schools</div>
+          </div>
+          <div class="auth-feature-list">
+            <div class="auth-feature">
+              <div class="af-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <span>No more paper sign-out sheets</span>
+            </div>
+            <div class="auth-feature">
+              <div class="af-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <span>Live dashboard for teachers and admins</span>
+            </div>
+            <div class="auth-feature">
+              <div class="af-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <span>Per-destination limits, boys and girls restrooms</span>
+            </div>
+            <div class="auth-feature">
+              <div class="af-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <span>FERPA compliant, free under 200 students</span>
+            </div>
+          </div>
+          <div class="auth-quote">
+            <div class="auth-quote-text">"We eliminated 100% of our paper sign-outs in week one."</div>
+            <div class="auth-quote-attr">Sandra Alvarez &mdash; 10th Grade English, Lincoln High</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right panel — form -->
+      <div class="auth-right">
+        <div class="auth-right-inner">
+
+          <!-- Tab switcher -->
+          <div class="auth-tabs">
+            <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Create account</button>
+            <button class="auth-tab" id="tab-login"  onclick="switchAuthTab('login')">Sign in</button>
+            <div class="auth-tab-slider" id="auth-tab-slider"></div>
+          </div>
+
+          <!-- SIGNUP FORM -->
+          <div class="auth-form" id="auth-form-signup">
+            <div class="auth-form-title">Get started free</div>
+            <div class="auth-form-sub">Set up your school in minutes. No credit card needed.</div>
+
+            <div class="auth-sso-group">
+              <button class="auth-sso-btn" onclick="ssoClick('Google')">
+                <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Continue with Google
+              </button>
+              <button class="auth-sso-btn auth-sso-clever" onclick="ssoClick('Clever')">
+                <svg viewBox="0 0 40 40" width="18" height="18" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#4274f4"/><path d="M20 9c-6.075 0-11 4.925-11 11s4.925 11 11 11c3.5 0 6.613-1.635 8.643-4.187l-3.23-2.396C24.04 25.8 22.11 27 20 27c-3.866 0-7-3.134-7-7s3.134-7 7-7c1.952 0 3.722.797 5.004 2.083l2.83-2.83C25.837 10.254 23.07 9 20 9z" fill="white"/></svg>
+                Continue with Clever
+              </button>
+            </div>
+
+            <div class="auth-divider"><span>or continue with email</span></div>
+
+            <div class="auth-field-group">
+              <div class="auth-field-row">
+                <div class="auth-field">
+                  <label class="auth-label">First name</label>
+                  <input class="auth-input" type="text" placeholder="Alex" />
+                </div>
+                <div class="auth-field">
+                  <label class="auth-label">Last name</label>
+                  <input class="auth-input" type="text" placeholder="Johnson" />
+                </div>
+              </div>
+              <div class="auth-field">
+                <label class="auth-label">Work email</label>
+                <input class="auth-input" id="signup-email" type="email" placeholder="you@school.edu" />
+              </div>
+              <div class="auth-field">
+                <label class="auth-label">School name</label>
+                <input class="auth-input" type="text" placeholder="Lincoln High School" />
+              </div>
+              <div class="auth-field">
+                <label class="auth-label">Password</label>
+                <div class="auth-input-pw-wrap">
+                  <input class="auth-input" id="signup-pw" type="password" placeholder="At least 8 characters" />
+                  <button class="auth-pw-toggle" onclick="togglePw('signup-pw', this)" type="button">Show</button>
+                </div>
+              </div>
+            </div>
+
+            <button class="auth-submit" onclick="authSubmit('signup')">Create my account</button>
+
+            <div class="auth-legal">
+              By creating an account you agree to our
+              <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+            </div>
+          </div>
+
+          <!-- LOGIN FORM -->
+          <div class="auth-form" id="auth-form-login" style="display:none">
+            <div class="auth-form-title">Welcome back</div>
+            <div class="auth-form-sub">Sign in to your outPass school account.</div>
+
+            <div class="auth-sso-group">
+              <button class="auth-sso-btn" onclick="ssoClick('Google')">
+                <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                Continue with Google
+              </button>
+              <button class="auth-sso-btn auth-sso-clever" onclick="ssoClick('Clever')">
+                <svg viewBox="0 0 40 40" width="18" height="18" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#4274f4"/><path d="M20 9c-6.075 0-11 4.925-11 11s4.925 11 11 11c3.5 0 6.613-1.635 8.643-4.187l-3.23-2.396C24.04 25.8 22.11 27 20 27c-3.866 0-7-3.134-7-7s3.134-7 7-7c1.952 0 3.722.797 5.004 2.083l2.83-2.83C25.837 10.254 23.07 9 20 9z" fill="white"/></svg>
+                Continue with Clever
+              </button>
+            </div>
+
+            <div class="auth-divider"><span>or sign in with email</span></div>
+
+            <div class="auth-field-group">
+              <div class="auth-field">
+                <label class="auth-label">Email</label>
+                <input class="auth-input" type="email" placeholder="you@school.edu" />
+              </div>
+              <div class="auth-field">
+                <label class="auth-label">Password</label>
+                <div class="auth-input-pw-wrap">
+                  <input class="auth-input" id="login-pw" type="password" placeholder="Your password" />
+                  <button class="auth-pw-toggle" onclick="togglePw('login-pw', this)" type="button">Show</button>
+                </div>
+                <div style="text-align:right;margin-top:0.35rem">
+                  <a href="#" class="auth-forgot">Forgot password?</a>
+                </div>
+              </div>
+            </div>
+
+            <button class="auth-submit" onclick="authSubmit('login')">Sign in</button>
+          </div>
+
+          <!-- Success state -->
+          <div class="auth-success" id="auth-success" style="display:none">
+            <div class="auth-success-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="auth-success-title" id="auth-success-title">Account created!</div>
+            <div class="auth-success-sub" id="auth-success-sub">Check your email to verify your account and get started.</div>
+            <button class="auth-submit" style="margin-top:1.5rem" onclick="closeAuth()">Back to outPass</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* ── AUTH MODAL ── */
+    .auth-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(20,16,58,0.55);
+      backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .auth-overlay.open { opacity: 1; pointer-events: all; }
+
+    .auth-modal {
+      background: white; border-radius: 22px;
+      width: 100%; max-width: 860px; max-height: 92vh;
+      display: grid; grid-template-columns: 1fr 1fr;
+      overflow: hidden; position: relative;
+      box-shadow: 0 24px 80px rgba(20,16,58,0.3), 0 0 0 1px rgba(255,255,255,0.08);
+      transform: translateY(24px) scale(0.97);
+      transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1);
+    }
+    .auth-overlay.open .auth-modal { transform: translateY(0) scale(1); }
+
+    .auth-close {
+      position: absolute; top: 1rem; right: 1rem; z-index: 10;
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: white; transition: all 0.15s;
+    }
+    .auth-close:hover { background: rgba(255,255,255,0.28); }
+
+    /* Left branding panel */
+    .auth-left {
+      background: linear-gradient(155deg, #4c1d95, #5b21b6 50%, #6d28d9);
+      display: flex; align-items: center; justify-content: center;
+      padding: 2.5rem;
+      position: relative; overflow: hidden;
+    }
+    .auth-left::before {
+      content: ''; position: absolute; top: -80px; right: -80px;
+      width: 280px; height: 280px; border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+    }
+    .auth-left::after {
+      content: ''; position: absolute; bottom: -60px; left: -60px;
+      width: 220px; height: 220px; border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+    .auth-left-inner { position: relative; z-index: 1; color: white; }
+
+    .auth-brand { margin-bottom: 2rem; }
+    .auth-brand-logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.5rem; letter-spacing: -0.03em; margin-bottom: 0.3rem; }
+    .auth-brand-logo span { color: #c4b5fd; }
+    .auth-brand-tag { font-size: 0.8rem; color: rgba(255,255,255,0.6); }
+
+    .auth-feature-list { display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 2rem; }
+    .auth-feature { display: flex; align-items: flex-start; gap: 0.7rem; font-size: 0.84rem; color: rgba(255,255,255,0.85); line-height: 1.5; }
+    .af-icon { width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 0.05rem; color: #a7f3d0; }
+
+    .auth-quote { border-top: 1px solid rgba(255,255,255,0.15); padding-top: 1.2rem; }
+    .auth-quote-text { font-size: 0.83rem; font-style: italic; color: rgba(255,255,255,0.8); line-height: 1.6; margin-bottom: 0.5rem; }
+    .auth-quote-attr { font-size: 0.72rem; color: rgba(255,255,255,0.5); }
+
+    /* Right form panel */
+    .auth-right { overflow-y: auto; display: flex; flex-direction: column; }
+    .auth-right-inner { padding: 2.2rem 2rem; display: flex; flex-direction: column; gap: 1.2rem; flex: 1; }
+
+    /* Tabs */
+    .auth-tabs {
+      display: flex; position: relative;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 0.25rem; gap: 0;
+    }
+    .auth-tab {
+      flex: 1; padding: 0.52rem; font-size: 0.82rem; font-weight: 600;
+      border: none; background: none; cursor: pointer; border-radius: 7px;
+      color: var(--muted); font-family: inherit; position: relative; z-index: 1;
+      transition: color 0.2s;
+    }
+    .auth-tab.active { color: var(--text); }
+    .auth-tab-slider {
+      position: absolute; top: 0.25rem; left: 0.25rem;
+      height: calc(100% - 0.5rem);
+      width: calc(50% - 0.25rem);
+      background: white; border-radius: 7px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      transition: transform 0.22s cubic-bezier(0.34,1.2,0.64,1);
+    }
+    .auth-tab-slider.right { transform: translateX(calc(100% + 0.25rem)); }
+
+    /* Form */
+    .auth-form-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; letter-spacing: -0.03em; }
+    .auth-form-sub   { font-size: 0.82rem; color: var(--muted); margin-top: 0.2rem; }
+
+    /* SSO buttons */
+    .auth-sso-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .auth-sso-btn {
+      display: flex; align-items: center; justify-content: center; gap: 0.65rem;
+      padding: 0.72rem 1rem; border: 1.5px solid var(--border); border-radius: 10px;
+      background: white; font-family: inherit; font-size: 0.86rem; font-weight: 600;
+      color: var(--text); cursor: pointer; transition: all 0.16s;
+    }
+    .auth-sso-btn:hover { border-color: var(--border2); background: var(--bg); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.06); }
+    .auth-sso-clever { }
+
+    /* Divider */
+    .auth-divider {
+      display: flex; align-items: center; gap: 0.75rem;
+      font-size: 0.75rem; color: var(--muted2);
+    }
+    .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* Fields */
+    .auth-field-group { display: flex; flex-direction: column; gap: 0.8rem; }
+    .auth-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+    .auth-field { display: flex; flex-direction: column; gap: 0.3rem; }
+    .auth-label { font-size: 0.74rem; font-weight: 700; color: var(--muted); letter-spacing: 0.03em; }
+    .auth-input {
+      width: 100%; padding: 0.65rem 0.9rem; border: 1.5px solid var(--border);
+      border-radius: 9px; font-family: inherit; font-size: 0.88rem; color: var(--text);
+      background: var(--bg); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .auth-input:focus { border-color: var(--accent2); background: white; box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    .auth-input-pw-wrap { position: relative; }
+    .auth-input-pw-wrap .auth-input { padding-right: 3rem; }
+    .auth-pw-toggle {
+      position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%);
+      font-size: 0.72rem; font-weight: 700; color: var(--accent2); background: none;
+      border: none; cursor: pointer; font-family: inherit; padding: 0.2rem 0.3rem;
+    }
+    .auth-forgot { font-size: 0.76rem; color: var(--accent2); text-decoration: none; font-weight: 600; }
+    .auth-forgot:hover { text-decoration: underline; }
+
+    /* Submit */
+    .auth-submit {
+      width: 100%; padding: 0.82rem; background: var(--accent2); color: white;
+      border: none; border-radius: 10px; font-family: inherit; font-weight: 700;
+      font-size: 0.92rem; cursor: pointer; letter-spacing: -0.01em;
+      transition: all 0.2s;
+    }
+    .auth-submit:hover { background: var(--accent); transform: translateY(-1px); box-shadow: 0 5px 18px rgba(124,58,237,0.35); }
+
+    .auth-legal { font-size: 0.72rem; color: var(--muted2); line-height: 1.6; text-align: center; }
+    .auth-legal a { color: var(--accent2); text-decoration: none; }
+    .auth-legal a:hover { text-decoration: underline; }
+
+    /* Success */
+    .auth-success { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 1rem 0; }
+    .auth-success-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem; animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+    .auth-success-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+    .auth-success-sub { font-size: 0.88rem; color: var(--muted); line-height: 1.65; max-width: 300px; }
+
+    /* SSO toast */
+    .sso-toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--text); color: white; border-radius: 100px;
+      padding: 0.7rem 1.4rem; font-size: 0.84rem; font-weight: 600;
+      z-index: 600; transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1);
+      white-space: nowrap; pointer-events: none;
+    }
+    .sso-toast.show { transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 700px) {
+      .auth-modal { grid-template-columns: 1fr; max-height: 95vh; }
+      .auth-left { display: none; }
+      .auth-close { color: var(--muted); background: var(--bg); border-color: var(--border); }
+    }
+  </style>
+
+  <div class="sso-toast" id="sso-toast"></div>
+
+  <script>
+    // ── SUPABASE ──
+    const SUPABASE_URL = 'https://zqfbperurjfbbptlxxne.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxZmJwZXJ1cmpmYmJwdGx4eG5lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMTUzMjcsImV4cCI6MjA4OTc5MTMyN30.RXJFAbmntrcpSiQGEuNXw5DVCUQ86H-K6JSSyOIwRHE';
+    let supabase;
+
+    const sbScript = document.createElement('script');
+    sbScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+    sbScript.onload = () => {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
+          closeAuth();
+          await checkUserRole(session.user);
+        }
+        if (event === 'SIGNED_OUT') showPage('landing');
+      });
+    };
+    document.head.appendChild(sbScript);
+
+    // ── PAGES ──
+    function showPage(page) {
+      document.getElementById('landing-wrap').style.display  = page === 'landing'     ? ''     : 'none';
+      document.getElementById('role-select-page').style.display = page === 'role-select' ? 'flex' : 'none';
+      document.getElementById('dashboard-page').style.display   = page === 'dashboard'   ? 'flex' : 'none';
+      document.body.style.overflow = page === 'landing' ? '' : 'hidden';
+    }
+
+    // ── ROLE CHECK ──
+    async function checkUserRole(user) {
+      const { data } = await supabase
+        .from('user_profiles')
+        .select('role, school_name, display_name')
+        .eq('id', user.id)
+        .single();
+      if (!data || !data.role) {
+        showPage('role-select');
+        const name = user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'there';
+        document.getElementById('rs-name').textContent = name;
+      } else {
+        openDashboard(data.role, data);
+      }
+    }
+
+    async function selectRole(role) {
+      if (!supabase) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const displayName = user.user_metadata?.full_name || user.email;
+      const school = document.getElementById('rs-school').value.trim() || 'My School';
+      await supabase.from('user_profiles').upsert({
+        id: user.id, role, display_name: displayName, school_name: school, email: user.email
+      }, { onConflict: 'id' });
+      openDashboard(role, { role, display_name: displayName, school_name: school });
+    }
+
+    // ── DASHBOARD ──
+    function openDashboard(role, profile) {
+      showPage('dashboard');
+      document.getElementById('db-school').textContent = profile.school_name || 'My School';
+      const first = (profile.display_name || '').split(' ')[0] || 'there';
+      document.getElementById('db-greeting').textContent = 'Welcome back, ' + first;
+      document.getElementById('db-role-badge').textContent = capitalize(role);
+      document.querySelectorAll('.db-role-panel').forEach(p => p.style.display = 'none');
+      const panel = document.getElementById('db-panel-' + role);
+      if (panel) panel.style.display = 'block';
+    }
+
+    function capitalize(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+    async function signOut() {
+      if (supabase) await supabase.auth.signOut();
+      showPage('landing');
+    }
+
+    function copyKioskLink() {
+      navigator.clipboard.writeText(document.getElementById('db-kiosk-url').textContent)
+        .then(() => showToast('Kiosk link copied!'));
+    }
+
+    // ── AUTH MODAL ──
+    function openAuth(tab) {
+      document.getElementById('auth-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      switchAuthTab(tab || 'signup');
+    }
+    function closeAuth() {
+      document.getElementById('auth-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(() => {
+        document.getElementById('auth-success').style.display = 'none';
+        const su = document.getElementById('auth-form-signup');
+        su.style.display = 'flex'; su.style.flexDirection = 'column';
+        document.getElementById('auth-form-login').style.display = 'none';
+        clearAuthErrors();
+      }, 300);
+    }
+    function closeAuthIfBg(e) {
+      if (e.target === document.getElementById('auth-overlay')) closeAuth();
+    }
+    function switchAuthTab(tab) {
+      const signup = document.getElementById('auth-form-signup');
+      const login  = document.getElementById('auth-form-login');
+      const slider = document.getElementById('auth-tab-slider');
+      const tSign  = document.getElementById('tab-signup');
+      const tLog   = document.getElementById('tab-login');
+      clearAuthErrors();
+      if (tab === 'signup') {
+        signup.style.display = 'flex'; signup.style.flexDirection = 'column';
+        login.style.display = 'none';
+        slider.classList.remove('right');
+        tSign.classList.add('active'); tLog.classList.remove('active');
+      } else {
+        login.style.display = 'flex'; login.style.flexDirection = 'column';
+        signup.style.display = 'none';
+        slider.classList.add('right');
+        tLog.classList.add('active'); tSign.classList.remove('active');
+      }
+    }
+
+    function showAuthError(msg) {
+      let el = document.getElementById('auth-error-msg');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'auth-error-msg';
+        el.style.cssText = 'background:#fef2f2;border:1.5px solid #fca5a5;border-radius:9px;padding:0.62rem 0.9rem;font-size:0.81rem;color:#dc2626;font-weight:600;margin-bottom:0.5rem';
+        const active = document.getElementById('auth-form-signup').style.display !== 'none'
+          ? document.getElementById('auth-form-signup')
+          : document.getElementById('auth-form-login');
+        const btn = active.querySelector('.auth-submit');
+        active.insertBefore(el, btn);
+      }
+      el.textContent = msg; el.style.display = 'block';
+    }
+    function clearAuthErrors() {
+      const el = document.getElementById('auth-error-msg');
+      if (el) el.style.display = 'none';
+    }
+    function setAuthLoading(loading) {
+      document.querySelectorAll('.auth-submit').forEach(btn => {
+        btn.disabled = loading;
+        if (loading) { btn.dataset.orig = btn.textContent; btn.textContent = 'Please wait...'; }
+        else if (btn.dataset.orig) btn.textContent = btn.dataset.orig;
+      });
+    }
+
+    async function authSubmit(type) {
+      if (!supabase) { showAuthError('Still loading — try again in a moment.'); return; }
+      clearAuthErrors();
+      if (type === 'signup') {
+        const firstName = document.querySelector('#auth-form-signup input[placeholder="Alex"]')?.value.trim() || '';
+        const lastName  = document.querySelector('#auth-form-signup input[placeholder="Johnson"]')?.value.trim() || '';
+        const email     = document.getElementById('signup-email').value.trim();
+        const school    = document.querySelector('#auth-form-signup input[placeholder="Lincoln High School"]')?.value.trim() || '';
+        const password  = document.getElementById('signup-pw').value;
+        if (!email || !password) { showAuthError('Please enter your email and a password.'); return; }
+        if (password.length < 8)  { showAuthError('Password must be at least 8 characters.'); return; }
+        setAuthLoading(true);
+        const { error } = await supabase.auth.signUp({
+          email, password,
+          options: { data: { full_name: (firstName + ' ' + lastName).trim(), school_name: school } }
+        });
+        setAuthLoading(false);
+        if (error) { showAuthError(error.message); return; }
+        document.getElementById('auth-form-signup').style.display = 'none';
+        const s = document.getElementById('auth-success');
+        s.style.display = 'flex'; s.style.flexDirection = 'column'; s.style.gap = '0';
+        document.getElementById('auth-success-title').textContent = 'Check your email!';
+        document.getElementById('auth-success-sub').textContent = 'We sent a confirmation link to ' + email + '. Click it to get started.';
+      } else {
+        const email    = document.querySelector('#auth-form-login input[type="email"]').value.trim();
+        const password = document.getElementById('login-pw').value;
+        if (!email || !password) { showAuthError('Please enter your email and password.'); return; }
+        setAuthLoading(true);
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        setAuthLoading(false);
+        if (error) { showAuthError(error.message.includes('Invalid') ? 'Incorrect email or password.' : error.message); return; }
+      }
+    }
+
+    async function ssoClick(provider) {
+      if (!supabase) { showToast('Still loading, try again shortly.'); return; }
+      if (provider === 'Clever') { showToast('Clever login coming soon — use email for now.'); return; }
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.href }
+      });
+      if (error) showToast('Google error: ' + error.message);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('sso-toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+    function togglePw(id, btn) {
+      const el = document.getElementById(id);
+      el.type = el.type === 'password' ? 'text' : 'password';
+      btn.textContent = el.type === 'password' ? 'Show' : 'Hide';
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAuth(); });
+    function ctaSubmit() { openAuth('signup'); }
+    function closeAuth() {
+      document.getElementById('auth-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+      // Reset success state
+      setTimeout(() => {
+        document.getElementById('auth-success').style.display = 'none';
+        document.getElementById('auth-form-signup').style.display = 'flex';
+        document.getElementById('auth-form-signup').style.flexDirection = 'column';
+        document.getElementById('auth-form-login').style.display = 'none';
+      }, 300);
+    }
+    function closeAuthIfBg(e) {
+      if (e.target === document.getElementById('auth-overlay')) closeAuth();
+    }
+
+    function switchAuthTab(tab) {
+      const signup = document.getElementById('auth-form-signup');
+      const login  = document.getElementById('auth-form-login');
+      const slider = document.getElementById('auth-tab-slider');
+      const tSign  = document.getElementById('tab-signup');
+      const tLog   = document.getElementById('tab-login');
+
+      if (tab === 'signup') {
+        signup.style.display = 'flex';
+        signup.style.flexDirection = 'column';
+        login.style.display  = 'none';
+        slider.classList.remove('right');
+        tSign.classList.add('active');
+        tLog.classList.remove('active');
+      } else {
+        login.style.display  = 'flex';
+        login.style.flexDirection = 'column';
+        signup.style.display = 'none';
+        slider.classList.add('right');
+        tLog.classList.add('active');
+        tSign.classList.remove('active');
+      }
+    }
+
+    function authSubmit(type) {
+      const successEl   = document.getElementById('auth-success');
+      const formSignup  = document.getElementById('auth-form-signup');
+      const formLogin   = document.getElementById('auth-form-login');
+      const titleEl     = document.getElementById('auth-success-title');
+      const subEl       = document.getElementById('auth-success-sub');
+
+      formSignup.style.display = 'none';
+      formLogin.style.display  = 'none';
+      successEl.style.display  = 'flex';
+      successEl.style.flexDirection = 'column';
+      successEl.style.gap = '0';
+
+      if (type === 'signup') {
+        const email = document.getElementById('signup-email').value.trim();
+        titleEl.textContent = 'Account created!';
+        subEl.textContent   = email
+          ? 'We sent a verification link to ' + email + '. Check your inbox to finish setting up your school.'
+          : 'Check your email to verify your account and get started.';
+      } else {
+        titleEl.textContent = 'Welcome back!';
+        subEl.textContent   = 'Redirecting you to your dashboard...';
+      }
+    }
+
+    function ssoClick(provider) {
+      const toast = document.getElementById('sso-toast');
+      toast.textContent = 'Redirecting to ' + provider + '...';
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 2600);
+    }
+
+    function togglePw(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = 'Hide';
+      } else {
+        input.type = 'password';
+        btn.textContent = 'Show';
+      }
+    }
+
+    // Escape key closes modal
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeAuth();
+    });
+
+    // Remove old ctaSubmit since CTA now opens auth
+    function ctaSubmit(btn) { openAuth('signup'); }
+  </script>
+
+  <!-- ── ROLE SELECTION PAGE ── -->
+  <div id="role-select-page" style="display:none;position:fixed;inset:0;z-index:400;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;padding:2rem;overflow-y:auto;">
+    <div class="rs-wrap">
+      <div class="rs-logo">outPass<span>.</span></div>
+      <h1 class="rs-title">Hi <span id="rs-name">there</span>, welcome aboard!</h1>
+      <p class="rs-sub">Tell us your role so we can set up the right experience for you.</p>
+      <div class="rs-school-field">
+        <label class="auth-label" style="display:block;margin-bottom:0.4rem">Your school name</label>
+        <input class="auth-input" id="rs-school" type="text" placeholder="e.g. Lincoln High School" />
+      </div>
+      <div class="rs-roles">
+        <button class="rs-role-card" onclick="selectRole('student')">
+          <div class="rs-role-icon" style="background:#f3f0ff;color:#7c3aed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          </div>
+          <div class="rs-role-label">Student</div>
+          <div class="rs-role-desc">Request hall passes and track your history</div>
+        </button>
+        <button class="rs-role-card" onclick="selectRole('teacher')">
+          <div class="rs-role-icon" style="background:#ecfdf5;color:#059669">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div class="rs-role-label">Teacher</div>
+          <div class="rs-role-desc">Approve passes and monitor your classroom</div>
+        </button>
+        <button class="rs-role-card" onclick="selectRole('administrator')">
+          <div class="rs-role-icon" style="background:#fffbeb;color:#d97706">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="rs-role-label">Administrator</div>
+          <div class="rs-role-desc">School-wide overview, reports, and settings</div>
+        </button>
+        <button class="rs-role-card" onclick="selectRole('kiosk')">
+          <div class="rs-role-icon" style="background:#fdf2f8;color:#db2777">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          </div>
+          <div class="rs-role-label">Kiosk</div>
+          <div class="rs-role-desc">Shared classroom device for sign-out and sign-in</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DASHBOARD PAGE ── -->
+  <div id="dashboard-page" style="display:none;position:fixed;inset:0;z-index:400;background:var(--bg);flex-direction:column;overflow:hidden;">
+    <div class="db-nav">
+      <div class="db-nav-logo">outPass<span>.</span></div>
+      <div class="db-school-pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <span id="db-school">My School</span>
+      </div>
+      <div class="db-nav-right">
+        <span class="db-greeting-text" id="db-greeting">Welcome back</span>
+        <span class="db-role-badge" id="db-role-badge">Teacher</span>
+        <button class="db-signout" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+
+    <div class="db-body">
+
+      <!-- STUDENT -->
+      <div class="db-role-panel" id="db-panel-student">
+        <div class="db-header"><div class="db-header-title">Your Pass Dashboard</div><div class="db-header-sub">Request a pass or view your recent history.</div></div>
+        <div class="db-grid-3">
+          <div class="db-stat-card"><div class="db-stat-num" style="color:var(--accent2)">4</div><div class="db-stat-label">Passes this week</div></div>
+          <div class="db-stat-card"><div class="db-stat-num" style="color:var(--green)">6.2</div><div class="db-stat-label">Avg. minutes out</div></div>
+          <div class="db-stat-card"><div class="db-stat-num">0</div><div class="db-stat-label">Active right now</div></div>
+        </div>
+        <div style="margin-bottom:1.5rem"><button class="db-primary-btn" onclick="showToast('Pass request coming soon!')">Request a hall pass</button></div>
+        <div class="db-card"><div class="db-card-title">Recent passes</div><div class="db-empty-state">No passes yet. Request your first one to get started.</div></div>
+      </div>
+
+      <!-- TEACHER -->
+      <div class="db-role-panel" id="db-panel-teacher">
+        <div class="db-header"><div class="db-header-title">Teacher Dashboard</div><div class="db-header-sub">Manage requests and monitor your classroom in real time.</div></div>
+        <div class="db-grid-3">
+          <div class="db-stat-card"><div class="db-stat-num" style="color:var(--accent2)">0</div><div class="db-stat-label">Students currently out</div></div>
+          <div class="db-stat-card"><div class="db-stat-num" style="color:var(--yellow)">0</div><div class="db-stat-label">Pending requests</div></div>
+          <div class="db-stat-card"><div class="db-stat-num" style="color:var(--green)">0</div><div class="db-stat-label">Passes today</div></div>
+        </div>
+        <div class="db-two-col">
+          <div class="db-card"><div class="db-card-title">Pending requests</div><div class="db-empty-state">No pending requests right now.</div></div>
+          <div class="db-card"><div class="db-card-title">Recent feedback</div><div class="db-empty-state">Student feedback will appear here after passes are ended.</div></div>
+        </div>
+        <div class="db-card" style="margin-top:1rem">
+          <div class="db-card-title">Your kiosk link</div>
+          <div class="db-card-sub">Share this with your classroom device so students can sign out.</div>
+          <div class="db-kiosk-link-row">
+            <div class="db-kiosk-link" id="db-kiosk-url">app.outpass.io/kiosk/room-204</div>
+            <button class="db-copy-btn" onclick="copyKioskLink()">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMINISTRATOR -->
+      <div class="db-role-panel" id="db-panel-administrator">
+        <div class="db-header"><div class="db-header-title">Admin Dashboard</div><div class="db-header-sub">School-wide pass activity, reports, and settings.</div></div>
+        <div class="db-grid-4">
+          <div class="db-stat-card"><div class="db-stat-num" style="color:var(--accent2)">0</div><div class="db-stat-label">Students out now</div></div>
+          <div class="db-stat-card"><div class="db-stat-num" style="color:var(--green)">0</div><div class="db-stat-label">Passes today</div></div>
+          <div class="db-stat-card"><div class="db-stat-num">0</div><div class="db-stat-label">Teachers active</div></div>
+          <div class="db-stat-card"><div class="db-stat-num">0</div><div class="db-stat-label">Total students</div></div>
+        </div>
+        <div class="db-two-col">
+          <div class="db-card"><div class="db-card-title">Live hall view</div><div class="db-empty-state">No students currently out in the hall.</div></div>
+          <div class="db-card"><div class="db-card-title">Recent feedback</div><div class="db-empty-state">Student feedback from all classrooms will appear here.</div></div>
+        </div>
+        <div class="db-card" style="margin-top:1rem">
+          <div class="db-card-title">Getting started</div>
+          <div class="db-card-sub">Invite teachers to outPass and set up your school.</div>
+          <button class="db-primary-btn" style="margin-top:1rem;width:auto" onclick="showToast('Teacher invite flow coming soon!')">Invite teachers</button>
+        </div>
+      </div>
+
+      <!-- KIOSK -->
+      <div class="db-role-panel" id="db-panel-kiosk">
+        <div class="db-header"><div class="db-header-title">Kiosk Mode</div><div class="db-header-sub">This device is set up as a shared classroom kiosk.</div></div>
+        <div class="db-card" style="text-align:center;padding:2.5rem">
+          <div style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:0.5rem">Ready for students</div>
+          <div style="font-size:0.88rem;color:var(--muted);margin-bottom:2rem">Students sign out and back in using this screen.</div>
+          <div class="db-kiosk-action-row">
+            <button class="db-kiosk-big-btn db-kiosk-out" onclick="showToast('Full kiosk mode coming soon!')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sign Out
+            </button>
+            <button class="db-kiosk-big-btn db-kiosk-in" onclick="showToast('Full kiosk mode coming soon!')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+              Sign Back In
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <style>
+    /* ROLE SELECT */
+    .rs-wrap { max-width: 580px; width: 100%; text-align: center; }
+    .rs-logo { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.3rem; letter-spacing:-0.03em; margin-bottom:1.8rem; }
+    .rs-logo span { color:var(--accent2); }
+    .rs-title { font-family:'Space Grotesk',sans-serif; font-size:clamp(1.5rem,3vw,2.1rem); font-weight:700; letter-spacing:-0.03em; margin-bottom:0.5rem; }
+    .rs-sub { font-size:0.93rem; color:var(--muted); margin-bottom:1.6rem; }
+    .rs-school-field { margin-bottom:1.6rem; text-align:left; }
+    .rs-roles { display:grid; grid-template-columns:repeat(2,1fr); gap:0.85rem; }
+    .rs-role-card { background:white; border:1.5px solid var(--border); border-radius:16px; padding:1.5rem 1.1rem; cursor:pointer; transition:all 0.18s; font-family:inherit; text-align:center; display:flex; flex-direction:column; align-items:center; gap:0.6rem; }
+    .rs-role-card:hover { border-color:var(--accent2); transform:translateY(-3px); box-shadow:0 8px 24px rgba(91,33,182,0.1); }
+    .rs-role-icon { width:54px; height:54px; border-radius:14px; display:flex; align-items:center; justify-content:center; }
+    .rs-role-label { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:0.97rem; }
+    .rs-role-desc { font-size:0.77rem; color:var(--muted); line-height:1.5; }
+
+    /* DASHBOARD */
+    .db-nav { height:58px; border-bottom:1.5px solid var(--border); background:white; display:flex; align-items:center; justify-content:space-between; padding:0 1.8rem; flex-shrink:0; gap:1rem; }
+    .db-nav-logo { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.1rem; letter-spacing:-0.03em; flex-shrink:0; }
+    .db-nav-logo span { color:var(--accent2); }
+    .db-school-pill { display:inline-flex; align-items:center; gap:0.4rem; background:var(--accent-bg); border:1px solid var(--border); border-radius:100px; padding:0.28rem 0.8rem; font-size:0.76rem; font-weight:600; color:var(--accent2); white-space:nowrap; }
+    .db-nav-right { display:flex; align-items:center; gap:0.75rem; flex-shrink:0; }
+    .db-greeting-text { font-size:0.82rem; color:var(--muted); white-space:nowrap; }
+    .db-role-badge { background:var(--accent-bg); color:var(--accent2); font-size:0.7rem; font-weight:700; padding:0.18rem 0.6rem; border-radius:100px; white-space:nowrap; }
+    .db-signout { font-size:0.78rem; font-weight:600; color:var(--muted); background:none; border:1.5px solid var(--border); border-radius:8px; padding:0.36rem 0.78rem; cursor:pointer; font-family:inherit; transition:all 0.15s; white-space:nowrap; }
+    .db-signout:hover { border-color:var(--red); color:var(--red); }
+    .db-body { flex:1; overflow-y:auto; padding:2rem 2.5rem; max-width:1160px; margin:0 auto; width:100%; }
+    .db-header { margin-bottom:1.8rem; }
+    .db-header-title { font-family:'Space Grotesk',sans-serif; font-size:1.4rem; font-weight:700; letter-spacing:-0.03em; margin-bottom:0.2rem; }
+    .db-header-sub { font-size:0.87rem; color:var(--muted); }
+    .db-grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.4rem; }
+    .db-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1.4rem; }
+    .db-stat-card { background:white; border:1.5px solid var(--border); border-radius:14px; padding:1.2rem 1.3rem; }
+    .db-stat-num { font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:700; letter-spacing:-0.03em; line-height:1; margin-bottom:0.3rem; }
+    .db-stat-label { font-size:0.77rem; color:var(--muted); }
+    .db-two-col { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .db-card { background:white; border:1.5px solid var(--border); border-radius:14px; padding:1.2rem 1.3rem; }
+    .db-card-title { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:0.88rem; letter-spacing:-0.01em; margin-bottom:0.28rem; }
+    .db-card-sub { font-size:0.79rem; color:var(--muted); }
+    .db-empty-state { font-size:0.81rem; color:var(--muted2); padding:0.9rem 0; }
+    .db-primary-btn { padding:0.7rem 1.4rem; background:var(--accent2); color:white; border:none; border-radius:100px; font-family:inherit; font-weight:700; font-size:0.88rem; cursor:pointer; transition:all 0.2s; box-shadow:0 3px 12px rgba(124,58,237,0.28); }
+    .db-primary-btn:hover { background:var(--accent); transform:translateY(-2px); }
+    .db-kiosk-link-row { display:flex; align-items:center; gap:0.65rem; margin-top:0.85rem; }
+    .db-kiosk-link { flex:1; background:var(--bg); border:1.5px solid var(--border); border-radius:9px; padding:0.58rem 0.88rem; font-size:0.8rem; font-family:'Space Grotesk',monospace; color:var(--accent2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .db-copy-btn { padding:0.58rem 1rem; background:var(--accent-bg); color:var(--accent2); border:1.5px solid var(--border); border-radius:9px; font-family:inherit; font-weight:700; font-size:0.78rem; cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+    .db-copy-btn:hover { background:var(--accent2); color:white; }
+    .db-kiosk-action-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; max-width:380px; margin:0 auto; }
+    .db-kiosk-big-btn { display:flex; flex-direction:column; align-items:center; gap:0.6rem; padding:1.4rem; border-radius:16px; border:1.5px solid var(--border); font-family:inherit; font-size:0.92rem; font-weight:700; cursor:pointer; transition:all 0.18s; }
+    .db-kiosk-out { background:var(--accent-bg); color:var(--accent2); }
+    .db-kiosk-out:hover { background:var(--accent2); color:white; transform:translateY(-2px); }
+    .db-kiosk-in  { background:var(--green-bg); color:var(--green); }
+    .db-kiosk-in:hover  { background:var(--green); color:white; transform:translateY(-2px); }
+    @media (max-width:700px) {
+      .rs-roles { grid-template-columns:1fr; }
+      .db-grid-3,.db-grid-4 { grid-template-columns:repeat(2,1fr); }
+      .db-two-col { grid-template-columns:1fr; }
+      .db-body { padding:1.2rem; }
+      .db-nav { padding:0 1rem; }
+      .db-greeting-text { display:none; }
+    }
+  </style>
+
+</body>
+</html>
