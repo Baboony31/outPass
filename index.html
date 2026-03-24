@@ -3,197 +3,272 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>outPass — Digital Hall Passes</title>
+  <title>outPass — The End of Paper Hall Passes</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,800&display=swap" rel="stylesheet" />
-  
   <style>
-    /* ── MODERN WHITE & PURPLE VARIABLE OVERRIDE ── */
     :root {
+      --primary: #7c3aed;
+      --primary-hover: #6d28d9;
+      --primary-soft: #f5f3ff;
       --ink: #0f172a;
-      --surface: #ffffff;
-      --bg: #ffffff; 
-      --border: #f1f5f9;
-      --border2: #e2e8f0;
-      --muted: #64748b;
-      --muted2: #94a3b8;
-      --violet: #7c3aed;
-      --violet2: #8b5cf6;
-      --violet-bg: #f5f3ff;
-      --green: #10b981;
-      --red: #ef4444;
+      --slate: #64748b;
+      --border: #e2e8f0;
+      --white: #ffffff;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--ink);
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ── NAVIGATION ── */
-    #main-nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2.5rem; height: 70px;
-      background: rgba(255,255,255,0.8);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-    .nl-logo {
-      font-family: 'Bricolage Grotesque', sans-serif;
-      font-weight: 800; font-size: 1.5rem; color: var(--ink);
-      text-decoration: none; display: flex; align-items: center;
-    }
-    .nl-logo span { color: var(--violet); }
-    .nl-signin { 
-      padding: .6rem 1.2rem; font-size: .85rem; font-weight: 600; 
-      color: var(--ink); background: white; border: 1px solid var(--border2); 
-      border-radius: 10px; cursor: pointer; transition: 0.2s;
-    }
-    .nl-signin:hover { border-color: var(--violet); color: var(--violet); }
-
-    /* ── HERO SECTION ── */
-    .lp-hero {
-      padding: 160px 2rem 80px;
-      max-width: 1200px; margin: 0 auto;
-      text-align: center;
-      display: flex; flex-direction: column; align-items: center;
-    }
-    .lp-h1 {
-      font-family: 'Bricolage Grotesque', sans-serif;
-      font-size: clamp(3rem, 8vw, 5rem);
-      font-weight: 800; line-height: 1; letter-spacing: -0.04em;
-      margin-bottom: 1.5rem; color: var(--ink);
-    }
-    .h1-grad {
-      background: linear-gradient(135deg, var(--violet) 0%, #a855f7 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .lp-sub {
-      font-size: 1.2rem; color: var(--muted); max-width: 600px; margin-bottom: 2.5rem;
-    }
-    .btn-hero-primary {
-      padding: 1rem 2rem; font-size: 1rem; font-weight: 700;
-      background: var(--violet); color: white; border: none;
-      border-radius: 12px; cursor: pointer; transition: 0.2s;
-      box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.3);
-    }
-    .btn-hero-primary:hover { transform: translateY(-2px); background: var(--violet2); }
-
-    /* ── LOGIN MODAL (LOCAL ONLY) ── */
-    #login-overlay {
-      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4);
-      backdrop-filter: blur(8px); z-index: 1000;
-      display: none; align-items: center; justify-content: center;
-      animation: fadeIn 0.3s ease;
-    }
-    .login-card {
-      background: white; padding: 2.5rem; border-radius: 24px;
-      width: 100%; max-width: 400px; border: 1px solid var(--border);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-    }
-    .login-card h2 { font-family: 'Bricolage Grotesque'; margin-bottom: 0.5rem; }
-    .login-card p { color: var(--muted); font-size: 0.9rem; margin-bottom: 2rem; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--ink); line-height: 1.6; overflow-x: hidden; }
     
-    .input-group { margin-bottom: 1.2rem; text-align: left; }
-    .input-group label { display: block; font-size: 0.8rem; font-weight: 700; margin-bottom: 0.5rem; }
-    .input-group input {
-      width: 100%; padding: 14px; border: 1px solid var(--border2);
-      border-radius: 12px; outline: none; transition: 0.2s;
-    }
-    .input-group input:focus { border-color: var(--violet); box-shadow: 0 0 0 4px var(--violet-bg); }
+    /* ── UTILS ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+    .section { padding: 80px 0; }
+    .flex-center { display: flex; align-items: center; justify-content: center; }
+    .btn { padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; border: none; font-family: inherit; }
+    .btn-p { background: var(--primary); color: white; }
+    .btn-p:hover { background: var(--primary-hover); transform: translateY(-2px); }
+    .btn-s { background: var(--white); border: 1px solid var(--border); color: var(--ink); }
 
-    .login-submit {
-      width: 100%; padding: 14px; background: var(--violet); color: white;
-      border: none; border-radius: 12px; font-weight: 700; cursor: pointer; margin-top: 1rem;
-    }
+    /* ── NAV ── */
+    nav { height: 72px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); z-index: 100; }
+    .logo { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 1.5rem; text-decoration: none; color: var(--ink); }
+    .logo span { color: var(--primary); }
 
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    /* ── HERO ── */
+    .hero { text-align: center; padding: 120px 0 60px; background: radial-gradient(circle at 50% -20%, #f5f3ff 0%, transparent 50%); }
+    h1 { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(2.5rem, 7vw, 5rem); line-height: 1; letter-spacing: -0.04em; margin-bottom: 1.5rem; }
+    .purple-grad { background: linear-gradient(to right, var(--primary), #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1.25rem; color: var(--slate); max-width: 700px; margin: 0 auto 2.5rem; }
+
+    /* ── STATS ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-top: 4rem; }
+    .stat-card { background: var(--primary-soft); padding: 2rem; border-radius: 20px; text-align: center; }
+    .stat-card h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 3rem; color: var(--primary); }
+    .stat-card p { font-weight: 600; color: var(--slate); font-size: 0.9rem; }
+
+    /* ── AUDIENCE TABS ── */
+    .tab-nav { display: flex; gap: 10px; justify-content: center; margin-bottom: 30px; }
+    .tab-btn { padding: 10px 20px; border-radius: 100px; border: 1px solid var(--border); background: white; cursor: pointer; font-weight: 600; color: var(--slate); transition: 0.3s; }
+    .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .audience-content { background: var(--primary-soft); padding: 3rem; border-radius: 30px; display: none; animation: fadeIn 0.4s ease; }
+    .audience-content.active { display: block; }
+
+    /* ── INTERACTIVE DEMO ── */
+    .demo-window { background: white; border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); overflow: hidden; margin-top: 50px; }
+    .demo-header { background: #f8fafc; padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; }
+    .demo-view-btn { padding: 6px 14px; border-radius: 6px; border: none; font-weight: 600; font-size: 0.8rem; cursor: pointer; background: transparent; color: var(--slate); }
+    .demo-view-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .demo-body { min-height: 400px; padding: 30px; }
+
+    /* ── TESTIMONIALS ── */
+    .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+    .t-card { border: 1px solid var(--border); padding: 2rem; border-radius: 20px; }
+    .t-author { margin-top: 1.5rem; display: flex; align-items: center; gap: 12px; }
+    .t-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; }
+
+    /* ── FOOTER ── */
+    footer { background: #f8fafc; padding: 60px 0; border-top: 1px solid var(--border); margin-top: 80px; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 4rem; }
+    .compliance { display: inline-flex; align-items: center; gap: 8px; color: var(--success); font-weight: 700; font-size: 0.8rem; border: 1px solid var(--success); padding: 4px 12px; border-radius: 6px; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
 
-  <nav id="main-nav">
-    <a href="#" class="nl-logo">out<span>Pass</span></a>
-    <div class="nl-actions">
-      <button class="nl-signin" id="open-login">Sign In</button>
+  <nav class="container">
+    <a href="#" class="logo">out<span>Pass</span></a>
+    <div>
+      <button class="btn btn-s" style="margin-right: 10px;">Login</button>
+      <button class="btn btn-p">Get Started</button>
     </div>
   </nav>
 
-  <main class="lp-hero">
-    <h1 class="lp-h1">The <span class="h1-grad">smarter way</span> to move through school.</h1>
-    <p class="lp-sub">Modern digital hall passes that save time for teachers and keep students safe. No more paper, no more hassle.</p>
-    <button class="btn-hero-primary">Get Started for Free</button>
-  </main>
-
-  <div id="login-overlay">
-    <div class="login-card">
-      <h2>Welcome back</h2>
-      <p>Enter your school details to continue.</p>
-      
-      <form id="local-login-form">
-        <div class="input-group">
-          <label>School Email</label>
-          <input type="email" placeholder="you@school.edu" required>
-        </div>
-        <div class="input-group">
-          <label>Password</label>
-          <input type="password" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="login-submit" id="submit-btn">Sign In</button>
-      </form>
-      
-      <button onclick="closeLogin()" style="background:none; border:none; color:var(--muted); font-size:0.8rem; margin-top:1.5rem; cursor:pointer; width:100%;">
-        Go Back
-      </button>
+  <section class="hero container">
+    <h1>The end of <span class="purple-grad">paper hall passes</span>.</h1>
+    <p>Ditch the dirty wood blocks and paper scraps. Switch to the digital pass system that helps schools reclaim lost instructional time.</p>
+    <div class="flex-center" style="gap: 15px;">
+      <button class="btn btn-p">Request a Demo</button>
+      <button class="btn btn-s">View Pricing</button>
     </div>
-  </div>
+
+    <div class="stats-grid">
+      <div class="stat-card"><h2>94%</h2><p>Reduction in unauthorized time</p></div>
+      <div class="stat-card"><h2>500+</h2><p>Active K-12 Schools</p></div>
+      <div class="stat-card"><h2>1.2M</h2><p>Passes Issued Monthly</p></div>
+      <div class="stat-card"><h2>15min</h2><p>Avg. Saved per Teacher/Day</p></div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div style="text-align: center; margin-bottom: 40px;">
+      <h2 style="font-family: 'Bricolage Grotesque'; font-size: 2.5rem;">Built for the entire school.</h2>
+    </div>
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchAudience('students', this)">Students</button>
+      <button class="tab-btn" onclick="switchAudience('teachers', this)">Teachers</button>
+      <button class="tab-btn" onclick="switchAudience('admins', this)">Admins</button>
+      <button class="tab-btn" onclick="switchAudience('parents', this)">Parents</button>
+    </div>
+
+    <div id="students" class="audience-content active">
+      <h3>Request passes in seconds.</h3>
+      <p>No more waiting for the teacher to finish their sentence. Request a pass silently from your laptop or tablet.</p>
+    </div>
+    <div id="teachers" class="audience-content">
+      <h3>Approve with one click.</h3>
+      <p>Manage your classroom flow without stopping your lecture. Set automated limits for "busy" hallway times.</p>
+    </div>
+    <div id="admins" class="audience-content">
+      <h3>Full campus visibility.</h3>
+      <p>Know exactly who is in the hall during an emergency. Identify "frequent flyers" and optimize bathroom schedules.</p>
+    </div>
+    <div id="parents" class="audience-content">
+      <h3>Stay in the loop.</h3>
+      <p>View historical movement data during parent-teacher conferences to understand your child's out-of-class patterns.</p>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div style="text-align: center;">
+      <h2 style="font-family: 'Bricolage Grotesque';">Interactive Demo</h2>
+      <p>Select a view to see how outPass works live.</p>
+    </div>
+
+    <div class="demo-window">
+      <div class="demo-header">
+        <button class="demo-view-btn active" onclick="switchDemo('student-view', this)">Student Form</button>
+        <button class="demo-view-btn" onclick="switchDemo('teacher-view', this)">Teacher Panel</button>
+        <button class="demo-view-btn" onclick="switchDemo('admin-view', this)">Admin Dashboard</button>
+      </div>
+      <div class="demo-body">
+        <div id="student-view" class="demo-pane">
+          <h4>New Pass Request</h4>
+          <div style="margin-top: 20px; max-width: 400px;">
+            <label style="display:block; font-size: 0.8rem; font-weight: 700;">Destination</label>
+            <select style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); margin-bottom:15px;">
+              <option>Restroom (North Wing)</option>
+              <option>Nurse</option>
+              <option>Main Office</option>
+              <option>Library</option>
+            </select>
+            <button class="btn btn-p" style="width: 100%;" onclick="alert('Pass Requested Locally!')">Send Request</button>
+          </div>
+        </div>
+
+        <div id="teacher-view" class="demo-pane" style="display:none;">
+          <h4>Pending Requests</h4>
+          <div style="border: 1px solid var(--border); border-radius: 12px; margin-top:15px; padding:15px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong>Jordan Smith</strong><br>
+              <span style="font-size:0.8rem; color:var(--slate)">To: Nurse • 2 mins ago</span>
+            </div>
+            <div>
+              <button onclick="this.parentElement.parentElement.remove()" style="background:var(--success); color:white; border:none; padding:5px 10px; border-radius:6px; cursor:pointer;">Approve</button>
+              <button onclick="this.parentElement.parentElement.remove()" style="background:var(--danger); color:white; border:none; padding:5px 10px; border-radius:6px; cursor:pointer;">Deny</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="admin-view" class="demo-pane" style="display:none;">
+          <h4>Campus Live Map</h4>
+          <table style="width:100%; margin-top:20px; border-collapse: collapse; font-size:0.9rem;">
+            <tr style="text-align:left; border-bottom: 2px solid var(--border);">
+              <th style="padding:10px">Student</th>
+              <th>Location</th>
+              <th>Time Out</th>
+              <th>Status</th>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--border);">
+              <td style="padding:10px">Alex Rivera</td>
+              <td>Library</td>
+              <td>12m</td>
+              <td><span style="color:var(--warning)">● Overdue</span></td>
+            </tr>
+            <tr>
+              <td style="padding:10px">Sarah Chen</td>
+              <td>Restroom</td>
+              <td>3m</td>
+              <td><span style="color:var(--success)">● In Hall</span></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="testimonial-grid">
+      <div class="t-card">
+        <p>"I finally have my hallway back. outPass eliminated the 'revolving door' of students leaving my class."</p>
+        <div class="t-author">
+          <div class="t-avatar">M</div>
+          <div><strong>Marcus T.</strong><br><small>10th Grade History Teacher</small></div>
+        </div>
+      </div>
+      <div class="t-card">
+        <p>"The data is invaluable for disciplinary hearings. It's objective, clear, and easy to access."</p>
+        <div class="t-author">
+          <div class="t-avatar">P</div>
+          <div><strong>Dr. Elena P.</strong><br><small>High School Principal</small></div>
+        </div>
+      </div>
+      <div class="t-card">
+        <p>"I love being able to see that my son is actually making it to his tutoring sessions on time."</p>
+        <div class="t-author">
+          <div class="t-avatar">L</div>
+          <div><strong>Linda W.</strong><br><small>PTA President</small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="#" class="logo">out<span>Pass</span></a>
+        <p style="margin-top:15px; color:var(--slate)">Making schools safer and more productive through smart technology.</p>
+        <div style="margin-top:20px;">
+          <span class="compliance">✓ FERPA Compliant</span>
+          <span class="compliance">✓ SOC2 Certified</span>
+        </div>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <ul style="list-style:none; color:var(--slate); font-size:0.9rem; margin-top:10px;">
+          <li>Features</li>
+          <li>Case Studies</li>
+          <li>Security</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul style="list-style:none; color:var(--slate); font-size:0.9rem; margin-top:10px;">
+          <li><a href="#" style="color:inherit">Privacy Policy</a></li>
+          <li><a href="#" style="color:inherit">FERPA Compliance</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
 
   <script>
-    const loginOverlay = document.getElementById('login-overlay');
-    const openBtn = document.getElementById('open-login');
-    const loginForm = document.getElementById('local-login-form');
-    const submitBtn = document.getElementById('submit-btn');
-
-    // UI Logic: Open Modal
-    openBtn.addEventListener('click', () => {
-      loginOverlay.style.display = 'flex';
-    });
-
-    // UI Logic: Close Modal
-    function closeLogin() {
-      loginOverlay.style.display = 'none';
+    function switchAudience(id, btn) {
+      document.querySelectorAll('.audience-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
     }
 
-    // "Fake" Login Logic: No APIs, just UI behavior
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault(); // Stops the page from trying to send data to a server
-      
-      submitBtn.innerText = "Authenticating...";
-      submitBtn.disabled = true;
-      submitBtn.style.opacity = "0.7";
-
-      // Simulate a local "success" delay
-      setTimeout(() => {
-        alert("Front-end demo success! In a production environment, this is where an API would verify your credentials.");
-        submitBtn.innerText = "Sign In";
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = "1";
-        closeLogin();
-      }, 1200);
-    });
-
-    // Close on background click
-    window.onclick = function(event) {
-      if (event.target == loginOverlay) {
-        closeLogin();
-      }
+    function switchDemo(id, btn) {
+      document.querySelectorAll('.demo-pane').forEach(p => p.style.display = 'none');
+      document.querySelectorAll('.demo-view-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).style.display = 'block';
+      btn.classList.add('active');
     }
   </script>
-
 </body>
 </html>
