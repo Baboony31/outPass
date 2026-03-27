@@ -1283,6 +1283,165 @@ footer {
 <!-- ============================================
      DEMO SECTION
 ============================================ -->
+<style>
+/* ── Demo extra styles ── */
+.demo-browser-url-text { transition: opacity 0.2s ease; }
+
+/* Toast notification */
+.demo-toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 12px 20px;
+  box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13.5px; font-weight: 500; color: var(--text-primary);
+  z-index: 999; opacity: 0; pointer-events: none;
+  transition: all 0.3s ease; white-space: nowrap;
+}
+.demo-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+.demo-toast-icon { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.demo-toast-icon svg { width: 12px; height: 12px; color: #fff; }
+.demo-toast-icon.success { background: #22c55e; }
+.demo-toast-icon.cancel  { background: #ef4444; }
+.demo-toast-icon.info    { background: var(--purple-500); }
+
+/* Pass card enter/exit animation */
+@keyframes passSlideIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+@keyframes passSlideOut {
+  from { opacity: 1; transform: translateX(0); max-height: 200px; margin-bottom: 6px; padding: 8px 10px; }
+  to   { opacity: 0; transform: translateX(30px); max-height: 0;   margin-bottom: 0;  padding: 0;       }
+}
+.pass-row { animation: passSlideIn 0.3s ease both; overflow: hidden; }
+.pass-row.removing {
+  animation: passSlideOut 0.35s ease forwards;
+  pointer-events: none;
+}
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+@keyframes cardSlideOut {
+  from { opacity: 1; transform: scale(1);    max-height: 400px; }
+  to   { opacity: 0; transform: scale(0.95); max-height: 0;     }
+}
+.teacher-pass-card { animation: cardSlideIn 0.3s ease both; overflow: hidden; }
+.teacher-pass-card.removing { animation: cardSlideOut 0.35s ease forwards; pointer-events: none; }
+
+/* Live clock pulse */
+.live-dot { display: inline-block; width: 7px; height: 7px; background: #22c55e; border-radius: 50%; margin-right: 5px; animation: pulse 2s infinite; vertical-align: middle; }
+
+/* Active pass timer */
+.pass-timer { font-weight: 700; font-variant-numeric: tabular-nums; }
+.pass-timer.over { color: #dc2626; }
+
+/* Issue pass modal overlay */
+.demo-modal-overlay {
+  display: none; position: absolute; inset: 0; z-index: 50;
+  background: rgba(0,0,0,0.35); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+  border-radius: var(--radius-xl);
+}
+.demo-modal-overlay.open { display: flex; }
+.demo-modal {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 28px;
+  width: 340px; max-width: calc(100% - 40px);
+  box-shadow: var(--shadow-xl);
+  animation: cardSlideIn 0.25s ease both;
+}
+.demo-modal h3 {
+  font-family: var(--font-display); font-size: 18px; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 20px;
+}
+.demo-modal-field { margin-bottom: 14px; }
+.demo-modal-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+.demo-modal-select, .demo-modal-input {
+  width: 100%; padding: 9px 12px;
+  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--bg-secondary); color: var(--text-primary);
+  font-family: var(--font-body); font-size: 14px;
+  outline: none; transition: border-color 0.2s;
+}
+.demo-modal-select:focus, .demo-modal-input:focus { border-color: var(--purple-400); }
+.demo-modal-actions { display: flex; gap: 8px; margin-top: 20px; }
+.demo-modal-btn {
+  flex: 1; padding: 10px; border-radius: var(--radius-sm);
+  font-size: 13.5px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; border: 1px solid transparent;
+}
+.demo-modal-btn-primary {
+  background: linear-gradient(135deg, var(--purple-700), var(--purple-500));
+  color: #fff; box-shadow: 0 4px 12px rgba(147,51,234,0.3);
+}
+.demo-modal-btn-primary:hover { box-shadow: 0 6px 16px rgba(147,51,234,0.4); }
+.demo-modal-btn-cancel { background: var(--bg-secondary); color: var(--text-secondary); border-color: var(--border); }
+.demo-modal-btn-cancel:hover { border-color: var(--border-strong); color: var(--text-primary); }
+
+/* History modal */
+.history-list { display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; }
+.history-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+.history-row:last-child { border-bottom: none; }
+.history-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* Alert panel */
+.alert-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 14px; border-radius: var(--radius-md);
+  border: 1px solid; margin-bottom: 8px;
+  animation: passSlideIn 0.3s ease both;
+}
+.alert-item.danger { background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.2); }
+.alert-item.warning { background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.2); }
+.alert-item.dismissed { opacity: 0; transform: translateX(20px); transition: all 0.3s ease; pointer-events: none; }
+.alert-icon { width: 32px; height: 32px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.alert-icon svg { width: 16px; height: 16px; }
+.alert-icon.danger { background: rgba(239,68,68,0.12); color: #dc2626; }
+.alert-icon.warning { background: rgba(245,158,11,0.12); color: #d97706; }
+.alert-body { flex: 1; }
+.alert-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; }
+.alert-sub { font-size: 12px; color: var(--text-secondary); }
+.alert-dismiss {
+  padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+  background: var(--bg-secondary); color: var(--text-muted);
+  border: 1px solid var(--border); cursor: pointer; white-space: nowrap;
+  transition: all 0.15s; align-self: center;
+}
+.alert-dismiss:hover { background: rgba(239,68,68,0.08); color: #dc2626; border-color: rgba(239,68,68,0.2); }
+
+/* Sidebar nav view switching */
+.demo-view { display: none; }
+.demo-view.active { display: block; }
+.demo-nav-item { cursor: pointer; user-select: none; }
+
+/* Students table */
+.students-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.students-table th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); padding: 0 10px 10px; border-bottom: 1px solid var(--border); }
+.students-table td { padding: 10px; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+.students-table tr:last-child td { border-bottom: none; }
+.students-table tr:hover td { background: var(--bg-secondary); }
+.student-name-cell { display: flex; align-items: center; gap: 8px; color: var(--text-primary); font-weight: 600; }
+.student-mini-avatar { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.pass-count-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.pass-count-badge.high { background: rgba(239,68,68,0.1); color: #dc2626; }
+.pass-count-badge.med  { background: rgba(245,158,11,0.1); color: #d97706; }
+.pass-count-badge.low  { background: rgba(34,197,94,0.1);  color: #16a34a; }
+
+/* Reports view */
+.report-stat-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 16px; }
+.report-stat { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; text-align: center; }
+.report-stat-val { font-family: var(--font-display); font-size: 28px; font-weight: 800; color: var(--text-primary); }
+.report-stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+/* Scroll area inside demo */
+.demo-main { overflow-y: auto; max-height: 460px; }
+.demo-main::-webkit-scrollbar { width: 4px; }
+.demo-main::-webkit-scrollbar-track { background: transparent; }
+.demo-main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+</style>
+
 <section class="demo" id="demo">
   <div class="container">
     <div class="demo-header observe-fade">
@@ -1291,14 +1450,14 @@ footer {
         Live Demo
       </div>
       <h2 class="section-title">See Outpass in action</h2>
-      <p class="section-subtitle">Explore the real Outpass interface. Switch views to see the admin dashboard, teacher controls, and analytics.</p>
+      <p class="section-subtitle">Explore the real Outpass interface. Every button works — issue passes, cancel them, dismiss alerts, and explore all views.</p>
     </div>
     <div class="demo-tabs observe-fade">
       <button class="demo-tab active" data-tab="dashboard">Admin Dashboard</button>
       <button class="demo-tab" data-tab="teacher">Teacher View</button>
       <button class="demo-tab" data-tab="analytics">Analytics</button>
     </div>
-    <div class="demo-browser observe-fade">
+    <div class="demo-browser observe-fade" style="position:relative;">
       <div class="demo-browser-bar">
         <div class="browser-dots">
           <div class="browser-dot"></div>
@@ -1307,13 +1466,17 @@ footer {
         </div>
         <div class="demo-browser-url">
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-          app.outpass.school/admin
+          <span class="demo-browser-url-text" id="demoUrlText">app.outpass.school/admin</span>
         </div>
       </div>
 
-      <!-- ADMIN DASHBOARD TAB -->
+      <!-- ══════════════════════════════════
+           ADMIN DASHBOARD TAB
+      ══════════════════════════════════ -->
       <div class="demo-content active" id="tab-dashboard">
-        <div class="demo-dashboard">
+        <div class="demo-dashboard" style="position:relative;">
+
+          <!-- Sidebar -->
           <div class="demo-sidebar">
             <div class="demo-sidebar-logo">
               <div class="demo-sidebar-logo-icon">
@@ -1321,224 +1484,334 @@ footer {
               </div>
               Outpass
             </div>
+
             <div class="demo-nav-section">
               <div class="demo-nav-section-title">Main</div>
-              <div class="demo-nav-item active">
+              <div class="demo-nav-item active" data-view="overview">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                 Overview
               </div>
-              <div class="demo-nav-item">
+              <div class="demo-nav-item" data-view="allpasses">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 All Passes
               </div>
-              <div class="demo-nav-item">
+              <div class="demo-nav-item" data-view="students">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 Students
               </div>
-              <div class="demo-nav-item">
+              <div class="demo-nav-item" data-view="reports">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 Reports
               </div>
             </div>
+
             <div class="demo-nav-section">
               <div class="demo-nav-section-title">System</div>
-              <div class="demo-nav-item">
+              <div class="demo-nav-item" data-view="alerts">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                Alerts <span style="margin-left:auto;background:rgba(239,68,68,0.12);color:#dc2626;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:700;">2</span>
+                Alerts <span id="adminAlertBadge" style="margin-left:auto;background:rgba(239,68,68,0.12);color:#dc2626;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:700;">2</span>
               </div>
-              <div class="demo-nav-item">
+              <div class="demo-nav-item" data-view="settings">
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 Settings
               </div>
             </div>
           </div>
+
+          <!-- Main area with multiple views -->
           <div class="demo-main">
-            <div class="demo-main-header">
-              <div class="demo-main-title">Good afternoon, Principal Chen 👋</div>
-              <div class="demo-main-date">Thursday, March 26 · 3:42 PM</div>
-            </div>
-            <div class="demo-stat-row">
-              <div class="demo-stat">
-                <div class="demo-stat-label"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg> Out Now</div>
-                <div class="demo-stat-val" style="color:var(--purple-600);">14</div>
-                <div class="demo-stat-change up">↑ 3 from last period</div>
+
+            <!-- VIEW: Overview -->
+            <div class="demo-view active" id="view-overview">
+              <div class="demo-main-header">
+                <div class="demo-main-title">Good afternoon, Principal Chen 👋</div>
+                <div class="demo-main-date" id="adminClock"><span class="live-dot"></span>Live</div>
               </div>
-              <div class="demo-stat">
-                <div class="demo-stat-label"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg> Total Today</div>
-                <div class="demo-stat-val">87</div>
-                <div class="demo-stat-change neutral">Avg: 82/day</div>
-              </div>
-              <div class="demo-stat">
-                <div class="demo-stat-label"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Avg Time</div>
-                <div class="demo-stat-val">6.2m</div>
-                <div class="demo-stat-change up">↓ Improved</div>
-              </div>
-              <div class="demo-stat">
-                <div class="demo-stat-label"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg> Alerts</div>
-                <div class="demo-stat-val" style="color:#dc2626;">2</div>
-                <div class="demo-stat-change neutral">Needs attention</div>
-              </div>
-            </div>
-            <div class="demo-grid-2">
-              <div class="demo-card">
-                <div class="demo-card-header">
-                  <div class="demo-card-title">Passes this week</div>
-                  <span style="font-size:11px;color:var(--text-muted)">Mon–Thu</span>
+              <div class="demo-stat-row">
+                <div class="demo-stat">
+                  <div class="demo-stat-label"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:inline;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg> Out Now</div>
+                  <div class="demo-stat-val" id="statOutNow" style="color:var(--purple-600);">3</div>
+                  <div class="demo-stat-change up">from this class</div>
                 </div>
-                <div class="mini-chart">
+                <div class="demo-stat">
+                  <div class="demo-stat-label"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:inline;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg> Total Today</div>
+                  <div class="demo-stat-val" id="statTotal">87</div>
+                  <div class="demo-stat-change neutral">Avg: 82/day</div>
+                </div>
+                <div class="demo-stat">
+                  <div class="demo-stat-label"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:inline;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Avg Time</div>
+                  <div class="demo-stat-val">6.2m</div>
+                  <div class="demo-stat-change up">↓ Improved</div>
+                </div>
+                <div class="demo-stat">
+                  <div class="demo-stat-label"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:inline;vertical-align:middle"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg> Alerts</div>
+                  <div class="demo-stat-val" id="statAlerts" style="color:#dc2626;">2</div>
+                  <div class="demo-stat-change neutral">Needs attention</div>
+                </div>
+              </div>
+              <div class="demo-grid-2">
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <div class="demo-card-title">Passes this week</div>
+                    <span style="font-size:11px;color:var(--text-muted)">Mon–Fri</span>
+                  </div>
+                  <div class="mini-chart">
+                    <div class="mini-bar" style="height:55%"></div>
+                    <div class="mini-bar" style="height:72%"></div>
+                    <div class="mini-bar" style="height:48%"></div>
+                    <div class="mini-bar" style="height:80%"></div>
+                    <div class="mini-bar" style="height:61%"></div>
+                    <div class="mini-bar" style="height:90%"></div>
+                    <div class="mini-bar" style="height:75%"></div>
+                    <div class="mini-bar today" style="height:100%"></div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text-muted)">
+                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri (Today)</span>
+                  </div>
+                </div>
+                <div class="demo-card">
+                  <div class="demo-card-header">
+                    <div class="demo-card-title">Active passes</div>
+                    <div class="dash-badge-live"><span></span>Live</div>
+                  </div>
+                  <div id="adminPassList">
+                    <!-- rendered by JS -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- VIEW: All Passes -->
+            <div class="demo-view" id="view-allpasses">
+              <div class="demo-main-header">
+                <div class="demo-main-title">All Passes — Today</div>
+                <div style="font-size:12px;color:var(--text-muted)">Showing all issued passes</div>
+              </div>
+              <div id="allPassesTable" style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
+                <!-- rendered by JS -->
+              </div>
+            </div>
+
+            <!-- VIEW: Students -->
+            <div class="demo-view" id="view-students">
+              <div class="demo-main-header">
+                <div class="demo-main-title">Students</div>
+                <div style="font-size:12px;color:var(--text-muted)">Pass usage this week</div>
+              </div>
+              <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;">
+                <table class="students-table">
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Grade</th>
+                      <th>Passes This Week</th>
+                      <th>Avg Duration</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="studentsTableBody">
+                    <!-- rendered by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- VIEW: Reports -->
+            <div class="demo-view" id="view-reports">
+              <div class="demo-main-header">
+                <div class="demo-main-title">Weekly Report</div>
+                <div style="font-size:12px;color:var(--text-muted)">March 24–28, 2026</div>
+              </div>
+              <div class="report-stat-grid">
+                <div class="report-stat">
+                  <div class="report-stat-val" id="reportTotal">87</div>
+                  <div class="report-stat-label">Total passes today</div>
+                </div>
+                <div class="report-stat">
+                  <div class="report-stat-val">6.2m</div>
+                  <div class="report-stat-label">Average duration</div>
+                </div>
+                <div class="report-stat">
+                  <div class="report-stat-val">94%</div>
+                  <div class="report-stat-label">On-time returns</div>
+                </div>
+                <div class="report-stat">
+                  <div class="report-stat-val" id="reportCancelled">0</div>
+                  <div class="report-stat-label">Passes cancelled</div>
+                </div>
+              </div>
+              <div class="demo-card" style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;">
+                <div class="demo-card-header"><div class="demo-card-title">Passes by day this week</div></div>
+                <div class="mini-chart" style="height:70px">
                   <div class="mini-bar" style="height:55%"></div>
                   <div class="mini-bar" style="height:72%"></div>
                   <div class="mini-bar" style="height:48%"></div>
                   <div class="mini-bar" style="height:80%"></div>
-                  <div class="mini-bar" style="height:61%"></div>
-                  <div class="mini-bar" style="height:90%"></div>
-                  <div class="mini-bar" style="height:75%"></div>
                   <div class="mini-bar today" style="height:100%"></div>
                 </div>
-                <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--text-muted)">
-                  <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu (Today)</span>
+                <div style="display:flex;justify-content:space-around;margin-top:8px;font-size:11px;color:var(--text-muted)">
+                  <span>Mon<br><strong style="color:var(--text-primary)">71</strong></span>
+                  <span>Tue<br><strong style="color:var(--text-primary)">83</strong></span>
+                  <span>Wed<br><strong style="color:var(--text-primary)">62</strong></span>
+                  <span>Thu<br><strong style="color:var(--text-primary)">78</strong></span>
+                  <span>Fri<br><strong style="color:var(--purple-600)" id="reportTodayBar">87</strong></span>
                 </div>
               </div>
-              <div class="demo-card">
-                <div class="demo-card-header">
-                  <div class="demo-card-title">Active passes — needs attention</div>
+            </div>
+
+            <!-- VIEW: Alerts -->
+            <div class="demo-view" id="view-alerts">
+              <div class="demo-main-header">
+                <div class="demo-main-title">Safety Alerts</div>
+                <div style="font-size:12px;color:var(--text-muted)">Real-time notifications</div>
+              </div>
+              <div id="alertsList">
+                <div class="alert-item danger" id="alert-1">
+                  <div class="alert-icon danger">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                  </div>
+                  <div class="alert-body">
+                    <div class="alert-title">Alex Johnson — 18 min in hallway</div>
+                    <div class="alert-sub">Restroom pass · Room 204 · Exceeded 15-min threshold</div>
+                  </div>
+                  <button class="alert-dismiss" data-alert="alert-1">Dismiss</button>
                 </div>
-                <div class="pass-list-item">
-                  <div class="pli-avatar" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">AJ</div>
-                  <div class="pli-info">
-                    <div class="pli-name">Alex Johnson</div>
-                    <div class="pli-meta">Restroom · 11 min ago · Room 204</div>
+                <div class="alert-item warning" id="alert-2">
+                  <div class="alert-icon warning">
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                   </div>
-                  <div class="pli-actions">
-                    <button class="lpi-btn lpi-btn-deny">Cancel</button>
+                  <div class="alert-body">
+                    <div class="alert-title">3rd restroom pass today — Marcus Lee</div>
+                    <div class="alert-sub">Unusual frequency · May need counselor follow-up</div>
+                  </div>
+                  <button class="alert-dismiss" data-alert="alert-2">Dismiss</button>
+                </div>
+                <div id="alertsEmpty" style="display:none;text-align:center;padding:32px 0;color:var(--text-muted);font-size:14px;">
+                  <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 10px;color:var(--text-muted)"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  No active alerts — all clear!
+                </div>
+              </div>
+            </div>
+
+            <!-- VIEW: Settings -->
+            <div class="demo-view" id="view-settings">
+              <div class="demo-main-header">
+                <div class="demo-main-title">Settings</div>
+                <div style="font-size:12px;color:var(--text-muted)">School configuration</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;display:flex;align-items:center;justify-content:space-between;">
+                  <div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">Auto-approve trusted students</div>
+                    <div style="font-size:12px;color:var(--text-muted)">Automatically approve passes for students with good standing</div>
+                  </div>
+                  <div id="toggleAutoApprove" class="demo-toggle active" onclick="demoToggle(this)">
+                    <div class="demo-toggle-knob"></div>
                   </div>
                 </div>
-                <div class="pass-list-item">
-                  <div class="pli-avatar" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8)">SM</div>
-                  <div class="pli-info">
-                    <div class="pli-name">Sofia Martinez</div>
-                    <div class="pli-meta">Nurse · 7 min ago · Room 118</div>
+                <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;display:flex;align-items:center;justify-content:space-between;">
+                  <div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">Safety alerts at 15 min</div>
+                    <div style="font-size:12px;color:var(--text-muted)">Notify staff when a pass exceeds 15 minutes</div>
                   </div>
-                  <div class="pli-actions">
-                    <button class="lpi-btn lpi-btn-deny">Cancel</button>
+                  <div id="toggleAlerts" class="demo-toggle active" onclick="demoToggle(this)">
+                    <div class="demo-toggle-knob"></div>
                   </div>
                 </div>
-                <div class="pass-list-item">
-                  <div class="pli-avatar" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">DK</div>
-                  <div class="pli-info">
-                    <div class="pli-name">David Kim</div>
-                    <div class="pli-meta">Library · 5 min ago · Room 301</div>
+                <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;display:flex;align-items:center;justify-content:space-between;">
+                  <div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">Limit concurrent passes</div>
+                    <div style="font-size:12px;color:var(--text-muted)">Max 2 students out per class at once</div>
                   </div>
-                  <div class="pli-actions">
-                    <button class="lpi-btn lpi-btn-deny">Cancel</button>
+                  <div id="toggleConcurrent" class="demo-toggle" onclick="demoToggle(this)">
+                    <div class="demo-toggle-knob"></div>
+                  </div>
+                </div>
+                <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;display:flex;align-items:center;justify-content:space-between;">
+                  <div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:3px;">Email digest to admin</div>
+                    <div style="font-size:12px;color:var(--text-muted)">Daily summary of pass activity sent each evening</div>
+                  </div>
+                  <div id="toggleEmail" class="demo-toggle active" onclick="demoToggle(this)">
+                    <div class="demo-toggle-knob"></div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+
+          </div><!-- /demo-main -->
+        </div><!-- /demo-dashboard -->
       </div>
 
-      <!-- TEACHER VIEW TAB -->
+      <!-- ══════════════════════════════════
+           TEACHER VIEW TAB
+      ══════════════════════════════════ -->
       <div class="demo-content" id="tab-teacher">
-        <div class="demo-teacher">
+        <div class="demo-teacher" style="position:relative;">
+
+          <!-- Issue pass modal -->
+          <div class="demo-modal-overlay" id="issuePassModal">
+            <div class="demo-modal">
+              <h3>Issue New Pass</h3>
+              <div class="demo-modal-field">
+                <div class="demo-modal-label">Student</div>
+                <select class="demo-modal-select" id="modalStudent">
+                  <option value="">Select student…</option>
+                  <option value="Jordan Park">Jordan Park</option>
+                  <option value="Priya Sharma">Priya Sharma</option>
+                  <option value="Ethan Brooks">Ethan Brooks</option>
+                  <option value="Mia Chen">Mia Chen</option>
+                  <option value="Lucas Ortega">Lucas Ortega</option>
+                </select>
+              </div>
+              <div class="demo-modal-field">
+                <div class="demo-modal-label">Destination</div>
+                <select class="demo-modal-select" id="modalDest">
+                  <option value="Restroom">Restroom</option>
+                  <option value="Nurse's Office">Nurse's Office</option>
+                  <option value="Library">Library</option>
+                  <option value="Main Office">Main Office</option>
+                  <option value="Counselor">Counselor</option>
+                  <option value="Water Fountain">Water Fountain</option>
+                </select>
+              </div>
+              <div class="demo-modal-actions">
+                <button class="demo-modal-btn demo-modal-btn-cancel" id="cancelIssueModal">Cancel</button>
+                <button class="demo-modal-btn demo-modal-btn-primary" id="confirmIssuePass">Issue Pass ✓</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- History modal -->
+          <div class="demo-modal-overlay" id="historyModal">
+            <div class="demo-modal">
+              <h3 id="historyModalTitle">Pass History</h3>
+              <div class="history-list" id="historyModalList"></div>
+              <div class="demo-modal-actions" style="margin-top:14px;">
+                <button class="demo-modal-btn demo-modal-btn-cancel" id="closeHistoryModal" style="flex:none;padding:9px 20px;">Close</button>
+              </div>
+            </div>
+          </div>
+
           <div class="demo-teacher-header">
             <div class="demo-teacher-title">Ms. Rivera's Class — Period 4</div>
-            <div class="demo-teacher-sub">2 students currently out · 1 pending request · 3:42 PM</div>
+            <div class="demo-teacher-sub" id="teacherSubheader">Loading…</div>
           </div>
-          <div class="teacher-grid">
-            <div class="teacher-pass-card active-card">
-              <div class="tpc-header">
-                <div class="tpc-student">
-                  <div class="tpc-avatar" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">AJ</div>
-                  <div>
-                    <div class="tpc-name">Alex Johnson</div>
-                    <div class="tpc-grade">10th Grade · Room 204</div>
-                  </div>
-                </div>
-                <div class="pass-status active">Active</div>
-              </div>
-              <div class="tpc-body">
-                <div class="tpc-row">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                  Destination: Restroom (2nd floor)
-                </div>
-                <div class="tpc-row">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  Out since 3:31 PM · <strong style="color:#dc2626">11 minutes</strong>
-                </div>
-              </div>
-              <div class="tpc-actions">
-                <button class="tpc-btn tpc-btn-cancel">Cancel Pass</button>
-                <button class="tpc-btn tpc-btn-view">View History</button>
-              </div>
-            </div>
-            <div class="teacher-pass-card active-card">
-              <div class="tpc-header">
-                <div class="tpc-student">
-                  <div class="tpc-avatar" style="background:linear-gradient(135deg,#10b981,#34d399)">SM</div>
-                  <div>
-                    <div class="tpc-name">Sofia Martinez</div>
-                    <div class="tpc-grade">10th Grade · Room 204</div>
-                  </div>
-                </div>
-                <div class="pass-status active">Active</div>
-              </div>
-              <div class="tpc-body">
-                <div class="tpc-row">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                  Destination: Nurse's Office
-                </div>
-                <div class="tpc-row">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  Out since 3:35 PM · 7 minutes
-                </div>
-              </div>
-              <div class="tpc-actions">
-                <button class="tpc-btn tpc-btn-cancel">Cancel Pass</button>
-                <button class="tpc-btn tpc-btn-view">View History</button>
-              </div>
-            </div>
-            <div class="teacher-pass-card pending-card">
-              <div class="tpc-header">
-                <div class="tpc-student">
-                  <div class="tpc-avatar" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">DK</div>
-                  <div>
-                    <div class="tpc-name">David Kim</div>
-                    <div class="tpc-grade">10th Grade · Room 204</div>
-                  </div>
-                </div>
-                <div class="pass-status pending">Auto-Approved</div>
-              </div>
-              <div class="tpc-body">
-                <div class="tpc-row">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                  Destination: Library
-                </div>
-                <div class="tpc-row">
-                  <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                  Just now — auto-approved (trusted)
-                </div>
-              </div>
-              <div class="tpc-actions">
-                <button class="tpc-btn tpc-btn-cancel">Cancel Pass</button>
-                <button class="tpc-btn tpc-btn-view">View History</button>
-              </div>
-            </div>
-            <div class="teacher-pass-card" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;min-height:160px;border-style:dashed;cursor:pointer;opacity:0.6;">
-              <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:var(--text-muted)"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-              <span style="font-size:13px;color:var(--text-muted)">Issue new pass</span>
-            </div>
+
+          <div class="teacher-grid" id="teacherPassGrid">
+            <!-- rendered by JS -->
           </div>
         </div>
       </div>
 
-      <!-- ANALYTICS TAB -->
+      <!-- ══════════════════════════════════
+           ANALYTICS TAB
+      ══════════════════════════════════ -->
       <div class="demo-content" id="tab-analytics">
         <div class="demo-analytics">
           <div class="analytics-header">
             <div class="analytics-title">School Analytics — This Week</div>
-            <div class="analytics-sub">Pass activity breakdown · March 24–26, 2026</div>
+            <div class="analytics-sub">Pass activity breakdown · March 24–28, 2026</div>
           </div>
           <div class="analytics-grid">
             <div class="analytics-card">
@@ -1546,32 +1819,8 @@ footer {
                 <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
                 Top Destinations
               </div>
-              <div class="bar-chart">
-                <div class="bar-row">
-                  <div class="bar-label">Restroom</div>
-                  <div class="bar-track"><div class="bar-fill" style="width:78%"></div></div>
-                  <div class="bar-count">142</div>
-                </div>
-                <div class="bar-row">
-                  <div class="bar-label">Library</div>
-                  <div class="bar-track"><div class="bar-fill" style="width:52%"></div></div>
-                  <div class="bar-count">94</div>
-                </div>
-                <div class="bar-row">
-                  <div class="bar-label">Nurse</div>
-                  <div class="bar-track"><div class="bar-fill" style="width:34%"></div></div>
-                  <div class="bar-count">62</div>
-                </div>
-                <div class="bar-row">
-                  <div class="bar-label">Office</div>
-                  <div class="bar-track"><div class="bar-fill" style="width:22%"></div></div>
-                  <div class="bar-count">40</div>
-                </div>
-                <div class="bar-row">
-                  <div class="bar-label">Counselor</div>
-                  <div class="bar-track"><div class="bar-fill" style="width:14%"></div></div>
-                  <div class="bar-count">26</div>
-                </div>
+              <div class="bar-chart" id="analyticsBarChart">
+                <!-- rendered by JS -->
               </div>
             </div>
             <div class="analytics-card">
@@ -1588,13 +1837,13 @@ footer {
                     <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f59e0b" stroke-width="3.8" stroke-dasharray="9 91" stroke-dashoffset="-86" stroke-linecap="round"/>
                     <circle cx="18" cy="18" r="15.9" fill="none" stroke="#ef4444" stroke-width="3.8" stroke-dasharray="5 95" stroke-dashoffset="-95" stroke-linecap="round"/>
                   </svg>
-                  <div class="donut-center"><strong>364</strong>total</div>
+                  <div class="donut-center"><strong id="donutTotal">364</strong>total</div>
                 </div>
                 <div class="donut-legend">
                   <div class="legend-item"><div class="legend-dot" style="background:var(--purple-500)"></div>Auto-approved (62%)</div>
                   <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Returned on time (24%)</div>
                   <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Late return (9%)</div>
-                  <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Cancelled (5%)</div>
+                  <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div><span id="analyticsDonutCancelledLabel">Cancelled (5%)</span></div>
                 </div>
               </div>
             </div>
@@ -1623,9 +1872,36 @@ footer {
           </div>
         </div>
       </div>
-    </div>
+
+    </div><!-- /demo-browser -->
   </div>
 </section>
+
+<!-- Toast -->
+<div class="demo-toast" id="demoToast">
+  <div class="demo-toast-icon success" id="demoToastIcon">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+  </div>
+  <span id="demoToastMsg">Pass cancelled</span>
+</div>
+
+<!-- Toggle CSS -->
+<style>
+.demo-toggle {
+  width: 42px; height: 24px; border-radius: 999px;
+  background: var(--border); cursor: pointer; position: relative;
+  transition: background 0.25s ease; flex-shrink: 0;
+  border: 1.5px solid var(--border-strong);
+}
+.demo-toggle.active { background: var(--purple-600); border-color: var(--purple-700); }
+.demo-toggle-knob {
+  position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: left 0.25s ease;
+}
+.demo-toggle.active .demo-toggle-knob { left: 20px; }
+</style>
 
 <!-- ============================================
      HOW IT WORKS
@@ -1896,140 +2172,586 @@ footer {
      JAVASCRIPT
 ============================================ -->
 <script>
-// ─── Navbar scroll ───────────────────────────
+/* =====================================================================
+   OUTPASS DEMO ENGINE — full interactive state
+   ===================================================================== */
+
+// ─── Navbar scroll ────────────────────────────────────────────────────
 const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
   navbar.classList.toggle('scrolled', window.scrollY > 20);
 });
 
-// ─── Theme toggle ─────────────────────────────
+// ─── Theme toggle ─────────────────────────────────────────────────────
 const themeToggle = document.getElementById('themeToggle');
-const iconSun = document.getElementById('icon-sun');
-const iconMoon = document.getElementById('icon-moon');
-const html = document.documentElement;
-
-// Load saved theme
-const savedTheme = localStorage.getItem('outpass-theme') || 'light';
+const iconSun     = document.getElementById('icon-sun');
+const iconMoon    = document.getElementById('icon-moon');
+const html        = document.documentElement;
+const savedTheme  = localStorage.getItem('outpass-theme') || 'light';
 html.setAttribute('data-theme', savedTheme);
 updateThemeIcon(savedTheme);
-
 themeToggle.addEventListener('click', () => {
-  const current = html.getAttribute('data-theme');
-  const next = current === 'light' ? 'dark' : 'light';
+  const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
   html.setAttribute('data-theme', next);
   localStorage.setItem('outpass-theme', next);
   updateThemeIcon(next);
 });
-
-function updateThemeIcon(theme) {
-  if (theme === 'dark') {
-    iconSun.style.display = 'none';
-    iconMoon.style.display = 'block';
-  } else {
-    iconSun.style.display = 'block';
-    iconMoon.style.display = 'none';
-  }
+function updateThemeIcon(t) {
+  iconSun.style.display  = t === 'dark' ? 'none'  : 'block';
+  iconMoon.style.display = t === 'dark' ? 'block' : 'none';
 }
 
-// ─── Mobile menu ──────────────────────────────
-const hamburger = document.getElementById('hamburger');
+// ─── Mobile menu ──────────────────────────────────────────────────────
+const hamburger  = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobileMenu');
 hamburger.addEventListener('click', () => {
   mobileMenu.classList.toggle('open');
   const bars = hamburger.querySelectorAll('span');
   if (mobileMenu.classList.contains('open')) {
     bars[0].style.transform = 'translateY(7px) rotate(45deg)';
-    bars[1].style.opacity = '0';
+    bars[1].style.opacity   = '0';
     bars[2].style.transform = 'translateY(-7px) rotate(-45deg)';
   } else {
-    bars[0].style.transform = ''; bars[1].style.opacity = ''; bars[2].style.transform = '';
+    bars[0].style.transform = bars[2].style.transform = '';
+    bars[1].style.opacity = '';
   }
 });
 function closeMobileMenu() {
   mobileMenu.classList.remove('open');
-  const bars = hamburger.querySelectorAll('span');
-  bars[0].style.transform = ''; bars[1].style.opacity = ''; bars[2].style.transform = '';
+  hamburger.querySelectorAll('span').forEach(b => { b.style.transform = ''; b.style.opacity = ''; });
 }
 
-// ─── Demo tabs ────────────────────────────────
+// ─── Scroll animations ────────────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.observe-fade').forEach(el => observer.observe(el));
+
+// ─── Active nav highlight ─────────────────────────────────────────────
+const navSections = document.querySelectorAll('section[id]');
+const navLinks    = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  navSections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+  navLinks.forEach(l => {
+    l.style.color = l.style.fontWeight = '';
+    if (l.getAttribute('href') === '#' + current) { l.style.color = 'var(--purple-600)'; l.style.fontWeight = '600'; }
+  });
+});
+
+/* =====================================================================
+   SHARED DEMO STATE
+   ===================================================================== */
+const AVATARS = {
+  'Alex Johnson':  { color: 'linear-gradient(135deg,#7c3aed,#a855f7)', initials: 'AJ' },
+  'Sofia Martinez':{ color: 'linear-gradient(135deg,#0ea5e9,#38bdf8)', initials: 'SM' },
+  'David Kim':     { color: 'linear-gradient(135deg,#f59e0b,#fbbf24)', initials: 'DK' },
+  'Tyler Williams':{ color: 'linear-gradient(135deg,#10b981,#34d399)', initials: 'TW' },
+  'Jordan Park':   { color: 'linear-gradient(135deg,#ec4899,#f472b6)', initials: 'JP' },
+  'Priya Sharma':  { color: 'linear-gradient(135deg,#8b5cf6,#c4b5fd)', initials: 'PS' },
+  'Ethan Brooks':  { color: 'linear-gradient(135deg,#0284c7,#38bdf8)', initials: 'EB' },
+  'Mia Chen':      { color: 'linear-gradient(135deg,#16a34a,#4ade80)', initials: 'MC' },
+  'Lucas Ortega':  { color: 'linear-gradient(135deg,#dc2626,#f87171)', initials: 'LO' },
+  'Marcus Lee':    { color: 'linear-gradient(135deg,#b45309,#fbbf24)', initials: 'ML' },
+};
+const STUDENT_HISTORY = {
+  'Alex Johnson':   [['Restroom','4 min','Returned'],['Library','8 min','Returned'],['Nurse','15 min','Late return']],
+  'Sofia Martinez': [['Nurse','6 min','Returned'],['Restroom','3 min','Returned']],
+  'David Kim':      [['Library','10 min','Returned'],['Office','4 min','Returned'],['Restroom','3 min','Returned']],
+  'Tyler Williams': [['Library','7 min','Returned'],['Counselor','12 min','Returned']],
+};
+
+// Live pass state — each pass: { id, name, dest, startTs, status:'active'|'returned'|'cancelled' }
+let passIdCounter = 10;
+let passes = [
+  { id:1, name:'Alex Johnson',   dest:'Restroom',     startTs: Date.now() - 11*60*1000, status:'active'   },
+  { id:2, name:'Sofia Martinez', dest:"Nurse's Office",startTs: Date.now() -  7*60*1000, status:'active'   },
+  { id:3, name:'Tyler Williams', dest:'Library',       startTs: Date.now() - 14*60*1000, status:'returned' },
+];
+
+let totalCancelledDemo = 0;
+let totalTodayDemo = 87;
+
+function getPass(id) { return passes.find(p => p.id === id); }
+function activePasses() { return passes.filter(p => p.status === 'active'); }
+function fmtElapsed(ms) {
+  const s = Math.floor(ms/1000), m = Math.floor(s/60);
+  return m > 0 ? `${m}m ${s%60}s` : `${s}s`;
+}
+function nowTime() {
+  const d = new Date();
+  let h = d.getHours(), m = d.getMinutes(), ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return `${h}:${String(m).padStart(2,'0')} ${ampm}`;
+}
+
+/* =====================================================================
+   TOAST
+   ===================================================================== */
+let toastTimer;
+function showToast(msg, type='success') {
+  const t   = document.getElementById('demoToast');
+  const ico = document.getElementById('demoToastIcon');
+  const txt = document.getElementById('demoToastMsg');
+  txt.textContent = msg;
+  ico.className   = 'demo-toast-icon ' + type;
+  ico.innerHTML   = type === 'cancel'
+    ? '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>'
+    : type === 'info'
+    ? '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+    : '<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* =====================================================================
+   DEMO TABS
+   ===================================================================== */
+const urlMap = { dashboard:'app.outpass.school/admin', teacher:'app.outpass.school/teacher/rivera', analytics:'app.outpass.school/analytics' };
 document.querySelectorAll('.demo-tab').forEach(tab => {
   tab.addEventListener('click', () => {
-    const tabId = tab.dataset.tab;
+    const id = tab.dataset.tab;
     document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.demo-content').forEach(c => c.classList.remove('active'));
     tab.classList.add('active');
-    document.getElementById('tab-' + tabId).classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+    document.getElementById('demoUrlText').textContent = urlMap[id] || 'app.outpass.school';
+    if (id === 'teacher')   renderTeacherView();
+    if (id === 'analytics') animateAnalyticsBars();
+    if (id === 'dashboard') renderAdminView(currentAdminView);
   });
 });
 
-// ─── Scroll animations ────────────────────────
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-document.querySelectorAll('.observe-fade').forEach(el => observer.observe(el));
-
-// ─── Smooth active nav highlight ─────────────
-const sections = document.querySelectorAll('section[id]');
-const navLinks = document.querySelectorAll('.nav-links a');
-window.addEventListener('scroll', () => {
-  let current = '';
-  sections.forEach(section => {
-    if (window.scrollY >= section.offsetTop - 120) {
-      current = section.getAttribute('id');
-    }
-  });
-  navLinks.forEach(link => {
-    link.style.color = '';
-    link.style.fontWeight = '';
-    if (link.getAttribute('href') === '#' + current) {
-      link.style.color = 'var(--purple-600)';
-      link.style.fontWeight = '600';
-    }
+/* =====================================================================
+   ADMIN SIDEBAR NAVIGATION
+   ===================================================================== */
+let currentAdminView = 'overview';
+document.querySelectorAll('.demo-nav-item[data-view]').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.demo-nav-item[data-view]').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    currentAdminView = item.dataset.view;
+    renderAdminView(currentAdminView);
   });
 });
 
-// ─── Pass row click demo interaction ─────────
-document.querySelectorAll('.lpi-btn-deny').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const row = this.closest('.pass-list-item');
-    row.style.opacity = '0';
-    row.style.transform = 'translateX(20px)';
-    row.style.transition = 'all 0.3s ease';
-    setTimeout(() => row.remove(), 300);
-  });
-});
+function renderAdminView(view) {
+  document.querySelectorAll('.demo-view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('view-' + view);
+  if (el) el.classList.add('active');
+  if (view === 'overview')  renderOverview();
+  if (view === 'allpasses') renderAllPasses();
+  if (view === 'students')  renderStudents();
+  if (view === 'reports')   renderReports();
+}
 
-document.querySelectorAll('.tpc-btn-cancel').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const card = this.closest('.teacher-pass-card');
-    const statusEl = card.querySelector('.pass-status');
-    if (statusEl) {
-      statusEl.textContent = 'Cancelled';
-      statusEl.className = 'pass-status';
-      statusEl.style.background = 'rgba(239,68,68,0.1)';
-      statusEl.style.color = '#dc2626';
-    }
-    this.textContent = 'Cancelled ✓';
-    this.disabled = true;
-    this.style.opacity = '0.5';
-  });
-});
+/* ─── Overview ─── */
+function renderOverview() {
+  const active = activePasses();
+  document.getElementById('statOutNow').textContent  = active.length;
+  document.getElementById('statTotal').textContent   = totalTodayDemo;
+  document.getElementById('statAlerts').textContent  = document.querySelectorAll('.alert-item:not([style*="display:none"])').length || 0;
 
-// ─── Animate bars when analytics tab shows ───
-document.querySelector('[data-tab="analytics"]').addEventListener('click', () => {
-  setTimeout(() => {
-    document.querySelectorAll('.bar-fill').forEach(bar => {
-      const w = bar.style.width;
-      bar.style.width = '0';
-      setTimeout(() => { bar.style.width = w; }, 50);
+  const list = document.getElementById('adminPassList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (passes.filter(p=>p.status!=='returned').length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:20px 0;color:var(--text-muted);font-size:13px;">No active passes right now.</div>';
+    return;
+  }
+  passes.filter(p => p.status !== 'returned').forEach(p => {
+    const av = AVATARS[p.name] || { color:'linear-gradient(135deg,#666,#999)', initials:'??' };
+    const elapsed = fmtElapsed(Date.now() - p.startTs);
+    const isOver  = (Date.now() - p.startTs) > 15*60*1000;
+    const row = document.createElement('div');
+    row.className = 'pass-list-item';
+    row.style.cssText = 'transition:all 0.3s ease';
+    row.innerHTML = `
+      <div class="pli-avatar" style="background:${av.color}">${av.initials}</div>
+      <div class="pli-info">
+        <div class="pli-name">${p.name}</div>
+        <div class="pli-meta">${p.dest} · <span style="${isOver?'color:#dc2626;font-weight:700':''}">${elapsed}</span></div>
+      </div>
+      <div class="pli-actions">
+        <button class="lpi-btn lpi-btn-deny" data-pid="${p.id}">Cancel</button>
+      </div>`;
+    list.appendChild(row);
+    row.querySelector('.lpi-btn-deny').addEventListener('click', function() {
+      cancelPassAdmin(p.id, row);
     });
-  }, 100);
+  });
+}
+
+function cancelPassAdmin(pid, rowEl) {
+  const p = getPass(pid);
+  if (!p) return;
+  p.status = 'cancelled';
+  totalCancelledDemo++;
+  totalTodayDemo++;
+  rowEl.classList.add('removing');
+  setTimeout(() => {
+    rowEl.remove();
+    syncAllViews();
+    showToast(`Pass cancelled for ${p.name}`, 'cancel');
+  }, 350);
+}
+
+/* ─── All Passes ─── */
+function renderAllPasses() {
+  const wrap = document.getElementById('allPassesTable');
+  if (!wrap) return;
+  const sorted = [...passes].sort((a,b) => b.startTs - a.startTs);
+  let rows = sorted.map(p => {
+    const av = AVATARS[p.name] || { color:'linear-gradient(135deg,#666,#999)', initials:'??' };
+    const elapsed = fmtElapsed(Date.now() - p.startTs);
+    const statusCls = p.status === 'active' ? 'active' : p.status === 'returned' ? 'returned' : '';
+    const statusStyle = p.status === 'cancelled' ? 'background:rgba(239,68,68,0.1);color:#dc2626;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase' : '';
+    const statusLabel = p.status === 'cancelled' ? `<span style="${statusStyle}">Cancelled</span>` : `<span class="pass-status ${statusCls}">${p.status==='active'?'Active':'Returned'}</span>`;
+    return `<tr>
+      <td><span class="student-name-cell">
+        <span class="student-mini-avatar" style="background:${av.color}">${av.initials}</span>
+        ${p.name}
+      </span></td>
+      <td>${p.dest}</td>
+      <td>${elapsed}</td>
+      <td>${statusLabel}</td>
+    </tr>`;
+  }).join('');
+  wrap.innerHTML = `<table class="students-table">
+    <thead><tr><th>Student</th><th>Destination</th><th>Duration</th><th>Status</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+/* ─── Students ─── */
+const STUDENT_ROWS = [
+  { name:'Alex Johnson',   grade:'10th', passes:8,  avg:'7m', status:'active'    },
+  { name:'Sofia Martinez', grade:'10th', passes:3,  avg:'5m', status:'active'    },
+  { name:'David Kim',      grade:'10th', passes:5,  avg:'6m', status:'in-class'  },
+  { name:'Tyler Williams', grade:'10th', passes:2,  avg:'9m', status:'returned'  },
+  { name:'Marcus Lee',     grade:'10th', passes:12, avg:'8m', status:'in-class'  },
+  { name:'Mia Chen',       grade:'10th', passes:1,  avg:'4m', status:'in-class'  },
+  { name:'Lucas Ortega',   grade:'10th', passes:4,  avg:'5m', status:'in-class'  },
+];
+function renderStudents() {
+  const tbody = document.getElementById('studentsTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = STUDENT_ROWS.map(s => {
+    const av = AVATARS[s.name] || { color:'linear-gradient(135deg,#666,#999)', initials:'??' };
+    const live = passes.find(p => p.name === s.name && p.status === 'active');
+    const statusEl = live
+      ? `<span class="pass-status active">Out now</span>`
+      : s.status === 'returned'
+      ? `<span class="pass-status returned">Returned</span>`
+      : `<span style="font-size:11px;color:var(--text-muted)">In class</span>`;
+    const cnt = s.passes + passes.filter(p=>p.name===s.name && p.status==='cancelled').length;
+    const lvl = cnt >= 8 ? 'high' : cnt >= 4 ? 'med' : 'low';
+    return `<tr>
+      <td><span class="student-name-cell">
+        <span class="student-mini-avatar" style="background:${av.color}">${av.initials}</span>
+        ${s.name}
+      </span></td>
+      <td>${s.grade}</td>
+      <td><span class="pass-count-badge ${lvl}">${cnt} passes</span></td>
+      <td>${s.avg}</td>
+      <td>${statusEl}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ─── Reports ─── */
+function renderReports() {
+  const el = document.getElementById('reportTotal');
+  if (el) el.textContent = totalTodayDemo;
+  const ec = document.getElementById('reportCancelled');
+  if (ec) ec.textContent = totalCancelledDemo;
+  const eb = document.getElementById('reportTodayBar');
+  if (eb) eb.textContent = totalTodayDemo;
+}
+
+/* ─── Sync all views ─── */
+function syncAllViews() {
+  renderOverview();
+  if (currentAdminView === 'allpasses') renderAllPasses();
+  if (currentAdminView === 'students')  renderStudents();
+  if (currentAdminView === 'reports')   renderReports();
+  updateAlertBadge();
+  syncTeacherSubheader();
+  syncAnalytics();
+}
+
+/* ─── Alert badge ─── */
+function updateAlertBadge() {
+  const visible = document.querySelectorAll('#alertsList .alert-item:not(.dismissed)').length;
+  const badge = document.getElementById('adminAlertBadge');
+  if (!badge) return;
+  badge.textContent = visible;
+  badge.style.display = visible > 0 ? '' : 'none';
+  const statEl = document.getElementById('statAlerts');
+  if (statEl) statEl.textContent = visible;
+}
+
+// Alert dismiss buttons
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.alert-dismiss');
+  if (!btn) return;
+  const alertEl = document.getElementById(btn.dataset.alert);
+  if (!alertEl) return;
+  alertEl.classList.add('dismissed');
+  setTimeout(() => {
+    alertEl.style.display = 'none';
+    updateAlertBadge();
+    const allGone = !document.querySelector('#alertsList .alert-item:not([style*="display:none"])');
+    if (allGone) document.getElementById('alertsEmpty').style.display = 'block';
+    showToast('Alert dismissed', 'info');
+  }, 320);
 });
+
+/* =====================================================================
+   TEACHER VIEW
+   ===================================================================== */
+function renderTeacherView() {
+  syncTeacherSubheader();
+  const grid = document.getElementById('teacherPassGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  const relevant = passes.filter(p => p.status !== 'returned');
+  relevant.forEach(p => {
+    const av = AVATARS[p.name] || { color:'linear-gradient(135deg,#666,#999)', initials:'??' };
+    const elapsed   = fmtElapsed(Date.now() - p.startTs);
+    const isOver    = (Date.now() - p.startTs) > 15*60*1000;
+    const isCancelled = p.status === 'cancelled';
+    const cardClass = isCancelled ? 'teacher-pass-card' : p.status === 'active' ? 'teacher-pass-card active-card' : 'teacher-pass-card pending-card';
+    const statusLabel = isCancelled ? 'Cancelled' : p.status === 'active' ? 'Active' : 'Auto-Approved';
+    const statusCls   = isCancelled ? '' : p.status === 'active' ? 'active' : 'pending';
+    const statusStyle = isCancelled ? 'background:rgba(239,68,68,0.1);color:#dc2626;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;white-space:nowrap;' : '';
+
+    const card = document.createElement('div');
+    card.className = cardClass;
+    card.dataset.pid = p.id;
+    card.innerHTML = `
+      <div class="tpc-header">
+        <div class="tpc-student">
+          <div class="tpc-avatar" style="background:${av.color}">${av.initials}</div>
+          <div>
+            <div class="tpc-name">${p.name}</div>
+            <div class="tpc-grade">10th Grade · Room 204</div>
+          </div>
+        </div>
+        ${statusStyle ? `<span style="${statusStyle}">${statusLabel}</span>` : `<div class="pass-status ${statusCls}">${statusLabel}</div>`}
+      </div>
+      <div class="tpc-body">
+        <div class="tpc-row">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:var(--purple-500);flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Destination: ${p.dest}
+        </div>
+        <div class="tpc-row">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:var(--purple-500);flex-shrink:0"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          ${isCancelled ? 'Pass cancelled by teacher' : `Out for <span class="pass-timer ${isOver ? 'over' : ''}" data-pid="${p.id}">${elapsed}</span>`}
+        </div>
+      </div>
+      <div class="tpc-actions">
+        <button class="tpc-btn tpc-btn-cancel" data-pid="${p.id}" ${isCancelled ? 'disabled style="opacity:.4"' : ''}>
+          ${isCancelled ? 'Cancelled ✓' : 'Cancel Pass'}
+        </button>
+        <button class="tpc-btn tpc-btn-view" data-pid="${p.id}">View History</button>
+      </div>`;
+    grid.appendChild(card);
+
+    // Cancel button
+    card.querySelector('.tpc-btn-cancel').addEventListener('click', function() {
+      if (this.disabled) return;
+      cancelPassTeacher(p.id, card);
+    });
+    // History button
+    card.querySelector('.tpc-btn-view').addEventListener('click', () => {
+      openHistoryModal(p.name);
+    });
+  });
+
+  // Issue new pass card
+  const addCard = document.createElement('div');
+  addCard.className = 'teacher-pass-card';
+  addCard.style.cssText = 'display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;min-height:160px;border-style:dashed;cursor:pointer;transition:all 0.2s;';
+  addCard.innerHTML = `<svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color:var(--text-muted)"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+    <span style="font-size:13px;color:var(--text-muted)">Issue new pass</span>`;
+  addCard.addEventListener('click', openIssueModal);
+  addCard.addEventListener('mouseenter', () => { addCard.style.borderColor = 'var(--purple-400)'; addCard.style.opacity = '1'; });
+  addCard.addEventListener('mouseleave', () => { addCard.style.borderColor = ''; addCard.style.opacity = '0.7'; });
+  addCard.style.opacity = '0.7';
+  grid.appendChild(addCard);
+}
+
+function cancelPassTeacher(pid, cardEl) {
+  const p = getPass(pid);
+  if (!p || p.status === 'cancelled') return;
+  p.status = 'cancelled';
+  totalCancelledDemo++;
+  cardEl.classList.add('removing');
+  setTimeout(() => {
+    syncAllViews();
+    renderTeacherView();
+    showToast(`Pass cancelled — ${p.name} recalled to class`, 'cancel');
+  }, 350);
+}
+
+function syncTeacherSubheader() {
+  const el = document.getElementById('teacherSubheader');
+  if (!el) return;
+  const out = activePasses().length;
+  el.textContent = `${out} student${out !== 1 ? 's' : ''} currently out · ${nowTime()}`;
+}
+
+/* ─── Issue Pass Modal ─── */
+function openIssueModal() {
+  document.getElementById('modalStudent').value = '';
+  document.getElementById('modalDest').value = 'Restroom';
+  document.getElementById('issuePassModal').classList.add('open');
+}
+function closeIssueModal() {
+  document.getElementById('issuePassModal').classList.remove('open');
+}
+document.getElementById('cancelIssueModal').addEventListener('click', closeIssueModal);
+document.getElementById('issuePassModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeIssueModal();
+});
+document.getElementById('confirmIssuePass').addEventListener('click', () => {
+  const name = document.getElementById('modalStudent').value;
+  const dest = document.getElementById('modalDest').value;
+  if (!name) { document.getElementById('modalStudent').style.borderColor = '#ef4444'; return; }
+  document.getElementById('modalStudent').style.borderColor = '';
+  passIdCounter++;
+  passes.push({ id: passIdCounter, name, dest, startTs: Date.now(), status:'active' });
+  totalTodayDemo++;
+  closeIssueModal();
+  syncAllViews();
+  renderTeacherView();
+  showToast(`Pass issued for ${name} → ${dest}`, 'success');
+});
+
+/* ─── History Modal ─── */
+function openHistoryModal(name) {
+  const modal = document.getElementById('historyModal');
+  const title = document.getElementById('historyModalTitle');
+  const list  = document.getElementById('historyModalList');
+  title.textContent = `${name} — Pass History`;
+  const hist = STUDENT_HISTORY[name] || [];
+  const allPasses = passes.filter(p => p.name === name);
+  list.innerHTML = '';
+  // live passes first
+  allPasses.forEach(p => {
+    const elapsed = fmtElapsed(Date.now() - p.startTs);
+    const color = p.status === 'active' ? '#22c55e' : p.status === 'cancelled' ? '#ef4444' : '#6366f1';
+    const label = p.status === 'active' ? 'Active now' : p.status === 'cancelled' ? 'Cancelled' : 'Returned';
+    list.innerHTML += `<div class="history-row"><div class="history-dot" style="background:${color}"></div><div style="flex:1"><strong>${p.dest}</strong> · ${elapsed}</div><span style="font-size:11px;color:var(--text-muted)">${label}</span></div>`;
+  });
+  // historical
+  hist.forEach(([dest, dur, status]) => {
+    const color = status === 'Returned' ? '#6366f1' : status === 'Late return' ? '#f59e0b' : '#ef4444';
+    list.innerHTML += `<div class="history-row"><div class="history-dot" style="background:${color}"></div><div style="flex:1"><strong>${dest}</strong> · ${dur}</div><span style="font-size:11px;color:var(--text-muted)">${status}</span></div>`;
+  });
+  if (list.innerHTML === '') list.innerHTML = '<div style="color:var(--text-muted);font-size:13px;padding:8px 0;">No pass history found.</div>';
+  modal.classList.add('open');
+}
+document.getElementById('closeHistoryModal').addEventListener('click', () => {
+  document.getElementById('historyModal').classList.remove('open');
+});
+document.getElementById('historyModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) document.getElementById('historyModal').classList.remove('open');
+});
+
+/* =====================================================================
+   ANALYTICS TAB
+   ===================================================================== */
+const DEST_DATA = [
+  { label:'Restroom', pct: 78, count: 142 },
+  { label:'Library',  pct: 52, count: 94  },
+  { label:'Nurse',    pct: 34, count: 62  },
+  { label:'Office',   pct: 22, count: 40  },
+  { label:'Counselor',pct: 14, count: 26  },
+];
+
+function animateAnalyticsBars() {
+  const chart = document.getElementById('analyticsBarChart');
+  if (!chart) return;
+  // bump cancelled into dest data
+  const extra = totalCancelledDemo;
+  chart.innerHTML = DEST_DATA.map(d => `
+    <div class="bar-row">
+      <div class="bar-label">${d.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:0%;transition:width 0.8s ease" data-w="${d.pct}%"></div></div>
+      <div class="bar-count">${d.count}</div>
+    </div>`).join('');
+  setTimeout(() => {
+    chart.querySelectorAll('.bar-fill').forEach(b => { b.style.width = b.dataset.w; });
+  }, 60);
+  // update donut total
+  const dt = document.getElementById('donutTotal');
+  if (dt) dt.textContent = 364 + passes.length - 3; // 3 initial
+  // update cancelled label
+  const cl = document.getElementById('analyticsDonutCancelledLabel');
+  if (cl && totalCancelledDemo > 0) {
+    const pct = Math.round((totalCancelledDemo / (364 + passes.length)) * 100);
+    cl.textContent = `Cancelled (${pct}%)`;
+  }
+}
+function syncAnalytics() {
+  if (document.getElementById('tab-analytics').classList.contains('active')) {
+    animateAnalyticsBars();
+  }
+}
+
+/* =====================================================================
+   SETTINGS TOGGLES
+   ===================================================================== */
+function demoToggle(el) {
+  el.classList.toggle('active');
+  const on = el.classList.contains('active');
+  const labels = {
+    toggleAutoApprove: ['Auto-approve enabled', 'Auto-approve disabled'],
+    toggleAlerts:      ['Safety alerts enabled', 'Safety alerts disabled'],
+    toggleConcurrent:  ['Concurrent pass limit on', 'Concurrent pass limit off'],
+    toggleEmail:       ['Email digest enabled', 'Email digest disabled'],
+  };
+  const pair = labels[el.id];
+  if (pair) showToast(on ? pair[0] : pair[1], on ? 'success' : 'info');
+}
+
+/* =====================================================================
+   LIVE CLOCK + TIMER UPDATES
+   ===================================================================== */
+setInterval(() => {
+  // Live clock
+  const clk = document.getElementById('adminClock');
+  if (clk) clk.innerHTML = `<span class="live-dot"></span>${nowTime()}`;
+  // Update timers on teacher cards
+  document.querySelectorAll('.pass-timer[data-pid]').forEach(el => {
+    const p = getPass(Number(el.dataset.pid));
+    if (!p || p.status !== 'active') return;
+    const elapsed = fmtElapsed(Date.now() - p.startTs);
+    const isOver  = (Date.now() - p.startTs) > 15*60*1000;
+    el.textContent = elapsed;
+    el.className = 'pass-timer' + (isOver ? ' over' : '');
+    // Auto-alert if just crossed 15 min threshold
+    if (isOver) {
+      const badge = document.getElementById('adminAlertBadge');
+      if (badge && badge.textContent === '0') { badge.textContent = '1'; badge.style.display = ''; }
+    }
+  });
+  // Re-render overview pass list timers
+  if (currentAdminView === 'overview' && document.getElementById('tab-dashboard').classList.contains('active')) {
+    renderOverview();
+  }
+}, 1000);
+
+/* =====================================================================
+   INIT
+   ===================================================================== */
+renderAdminView('overview');
+// Delay teacher render until tab is opened
+document.querySelector('[data-tab="teacher"]').addEventListener('click', renderTeacherView, { once: false });
 </script>
 </body>
 </html>
