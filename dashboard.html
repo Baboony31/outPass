@@ -1,1 +1,442 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Outpass — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root{--p4:#c084fc;--p5:#a855f7;--p6:#9333ea;--p7:#7c3aed;--bg:#fff;--bg2:#fafaf9;--bgc:#fff;--bdr:rgba(0,0,0,.08);--bds:rgba(0,0,0,.14);--t1:#0a0a0a;--t2:#525252;--tm:#a3a3a3;--ssm:0 1px 3px rgba(0,0,0,.06);--smd:0 4px 16px rgba(0,0,0,.08);--slg:0 12px 40px rgba(0,0,0,.12);--rsm:8px;--rmd:14px;--rlg:20px;--fd:'Bricolage Grotesque',sans-serif;--fb:'DM Sans',sans-serif;}
+[data-theme=dark]{--bg:#0c0c0f;--bg2:#111114;--bgc:#18181c;--bdr:rgba(255,255,255,.07);--bds:rgba(255,255,255,.12);--t1:#fafafa;--t2:#a3a3a3;--tm:#525252;--ssm:0 1px 3px rgba(0,0,0,.3);--smd:0 4px 16px rgba(0,0,0,.4);--slg:0 12px 40px rgba(0,0,0,.5);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:var(--fb);background:var(--bg);color:var(--t1);display:flex;height:100vh;overflow:hidden;transition:background .3s,color .3s;}
+/* sidebar */
+.sb{width:240px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bdr);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+.sb-brand{display:flex;align-items:center;gap:10px;padding:18px 16px;border-bottom:1px solid var(--bdr);}
+.sb-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--p6),var(--p4));border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(147,51,234,.3);}
+.sb-icon svg{width:15px;height:15px;color:#fff;}
+.sb-name{font-family:var(--fd);font-size:17px;font-weight:700;color:var(--t1);}
+.sb-school{font-size:10px;color:var(--tm);}
+.sb-nav{flex:1;padding:10px 8px;}
+.nst{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--tm);padding:0 8px;margin:10px 0 4px;}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--rsm);font-size:13px;color:var(--t2);cursor:pointer;transition:all .15s;margin-bottom:1px;border:1px solid transparent;}
+.ni svg{width:15px;height:15px;flex-shrink:0;}
+.ni:hover{background:var(--bdr);color:var(--t1);}
+.ni.on{background:linear-gradient(135deg,rgba(147,51,234,.12),rgba(168,85,247,.07));color:var(--p6);font-weight:600;border-color:rgba(147,51,234,.15);}
+[data-theme=dark] .ni.on{color:var(--p4);}
+.nbadge{margin-left:auto;background:rgba(239,68,68,.12);color:#dc2626;border-radius:999px;padding:1px 7px;font-size:10px;font-weight:700;}
+.sb-user{padding:12px 14px;border-top:1px solid var(--bdr);display:flex;align-items:center;gap:9px;}
+.su-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--p6),var(--p4));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.su-info{flex:1;min-width:0;}
+.su-n{font-size:12.5px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.su-r{font-size:10px;color:var(--tm);text-transform:capitalize;}
+.lo-btn{width:26px;height:26px;border-radius:var(--rsm);border:1px solid var(--bdr);background:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tm);transition:all .15s;flex-shrink:0;}
+.lo-btn:hover{border-color:#ef4444;color:#ef4444;}
+.lo-btn svg{width:12px;height:12px;}
+/* main */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:58px;border-bottom:1px solid var(--bdr);background:var(--bgc);flex-shrink:0;gap:12px;}
+.tb-title{font-family:var(--fd);font-size:17px;font-weight:700;color:var(--t1);}
+.tb-r{display:flex;align-items:center;gap:10px;}
+.tb-clk{font-size:12px;color:var(--tm);}
+.ibtn{width:32px;height:32px;border-radius:var(--rsm);border:1px solid var(--bdr);background:var(--bg2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);transition:all .2s;}
+.ibtn:hover{border-color:var(--p4);color:var(--p5);}
+.ibtn svg{width:14px;height:14px;}
+.content{flex:1;overflow-y:auto;padding:24px;}
+.content::-webkit-scrollbar{width:4px;}
+.content::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px;}
+/* views */
+.view{display:none;}
+.view.active{display:block;animation:fi .3s ease both;}
+@keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* stat grid */
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+@media(max-width:1100px){.sg{grid-template-columns:repeat(2,1fr);}}
+.sc{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rmd);padding:18px;box-shadow:var(--ssm);transition:all .2s;}
+.sc:hover{box-shadow:var(--smd);transform:translateY(-1px);}
+.sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.sc-ico{width:36px;height:36px;border-radius:var(--rsm);display:flex;align-items:center;justify-content:center;}
+.sc-ico svg{width:17px;height:17px;}
+.sc-trend{font-size:10px;font-weight:600;padding:2px 7px;border-radius:999px;}
+.t-up{background:rgba(34,197,94,.1);color:#16a34a;}
+.t-neu{background:rgba(148,163,184,.1);color:var(--tm);}
+.t-dn{background:rgba(239,68,68,.1);color:#dc2626;}
+.sc-val{font-family:var(--fd);font-size:28px;font-weight:800;color:var(--t1);line-height:1;}
+.sc-lbl{font-size:11px;color:var(--tm);margin-top:3px;}
+/* grid-2 */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;}
+@media(max-width:900px){.g2{grid-template-columns:1fr;}}
+/* panel */
+.panel{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rmd);box-shadow:var(--ssm);}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bdr);}
+.pt{font-size:13.5px;font-weight:700;color:var(--t1);}
+.pb{padding:14px 18px;}
+.live-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;background:rgba(34,197,94,.1);color:#16a34a;font-size:10px;font-weight:700;}
+.ld{display:inline-block;width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+/* pass row */
+.pr{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr);font-size:12.5px;}
+.pr:last-child{border-bottom:none;}
+.pav{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;}
+.pi{flex:1;min-width:0;}
+.pn{font-weight:600;color:var(--t1);}
+.pm{font-size:11px;color:var(--tm);margin-top:1px;}
+.ptm{font-size:11px;color:var(--tm);white-space:nowrap;}
+/* badges */
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;white-space:nowrap;}
+.ba{background:rgba(34,197,94,.1);color:#16a34a;}
+.br{background:rgba(99,102,241,.1);color:#6366f1;}
+.bc{background:rgba(239,68,68,.1);color:#dc2626;}
+.bp{background:rgba(245,158,11,.1);color:#d97706;}
+[data-theme=dark] .ba{background:rgba(34,197,94,.15);color:#4ade80;}
+[data-theme=dark] .br{background:rgba(99,102,241,.15);color:#818cf8;}
+/* mini chart */
+.mc{display:flex;align-items:flex-end;gap:4px;height:60px;}
+.mb{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--p5),var(--p7));opacity:.75;transition:opacity .2s;min-width:8px;}
+.mb:hover{opacity:1;}
+.mb.td{opacity:1;background:linear-gradient(180deg,var(--p4),var(--p6));}
+.cl{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;color:var(--tm);}
+/* bar chart */
+.bc-wrap{display:flex;flex-direction:column;gap:8px;}
+.br-row{display:flex;align-items:center;gap:9px;font-size:11.5px;}
+.bl{width:66px;color:var(--t2);font-size:10px;text-align:right;flex-shrink:0;}
+.bt{flex:1;height:9px;background:var(--bdr);border-radius:999px;overflow:hidden;}
+.bf{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--p6),var(--p4));transition:width .8s ease;}
+.bct{width:26px;font-size:10px;font-weight:600;color:var(--t2);}
+/* action buttons */
+.ab{padding:6px 12px;border-radius:var(--rsm);font-size:11.5px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s;font-family:var(--fb);}
+.a-cancel{background:rgba(239,68,68,.08);color:#dc2626;border-color:rgba(239,68,68,.15);}
+.a-cancel:hover{background:rgba(239,68,68,.15);}
+.a-primary{background:linear-gradient(135deg,var(--p7),var(--p5));color:#fff;box-shadow:0 3px 10px rgba(147,51,234,.25);}
+.a-primary:hover{box-shadow:0 5px 16px rgba(147,51,234,.35);transform:translateY(-1px);}
+/* page header */
+.pgh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;}
+.pgh h2{font-family:var(--fd);font-size:21px;font-weight:800;color:var(--t1);margin-bottom:3px;}
+.pgh p{font-size:12.5px;color:var(--tm);}
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+.tbl th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--tm);padding:0 12px 9px;border-bottom:1px solid var(--bdr);}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--bdr);color:var(--t2);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:var(--bg2);}
+.tbl-name{display:flex;align-items:center;gap:7px;font-weight:600;color:var(--t1);}
+.mav{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;}
+/* student request */
+.dest-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:18px;}
+.db{padding:14px 8px;border-radius:var(--rmd);border:1.5px solid var(--bdr);background:var(--bg2);text-align:center;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:5px;}
+.db:hover{border-color:var(--p4);transform:translateY(-2px);box-shadow:var(--smd);}
+.db.sel{border-color:var(--p5);background:rgba(147,51,234,.07);box-shadow:0 0 0 3px rgba(147,51,234,.12);}
+.de{font-size:24px;}
+.dl{font-size:11.5px;font-weight:700;color:var(--t1);}
+.ff{margin-bottom:14px;}
+.fl{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.05em;}
+.fi{width:100%;padding:10px 13px;border:1.5px solid var(--bdr);border-radius:var(--rsm);background:var(--bg2);color:var(--t1);font-family:var(--fb);font-size:13.5px;outline:none;transition:border-color .2s;}
+.fi:focus{border-color:var(--p5);}
+.fte{resize:none;}
+.big-btn{width:100%;padding:12px;border-radius:var(--rmd);font-size:14px;font-weight:700;color:#fff;font-family:var(--fb);background:linear-gradient(135deg,var(--p7),var(--p5));border:none;cursor:pointer;box-shadow:0 4px 14px rgba(147,51,234,.3);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.big-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(147,51,234,.4);}
+.big-btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+/* active pass card */
+.apc{background:linear-gradient(135deg,var(--p7),var(--p5));border-radius:var(--rlg);padding:26px;color:#fff;margin-bottom:22px;position:relative;overflow:hidden;box-shadow:0 8px 30px rgba(147,51,234,.35);}
+.apc-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:30px 30px;}
+.apc-c{position:relative;z-index:1;}
+.apc-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;opacity:.75;margin-bottom:5px;}
+.apc-title{font-family:var(--fd);font-size:26px;font-weight:800;margin-bottom:3px;}
+.apc-sub{font-size:12px;opacity:.8;margin-bottom:18px;}
+.apc-details{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:20px;}
+.apc-d{display:flex;flex-direction:column;gap:2px;}
+.apc-dl{font-size:9px;opacity:.65;text-transform:uppercase;letter-spacing:.08em;}
+.apc-dv{font-size:14px;font-weight:700;}
+.apc-timer{font-family:var(--fd);font-size:34px;font-weight:800;letter-spacing:-.02em;margin-bottom:3px;font-variant-numeric:tabular-nums;}
+.apc-timer.urg{color:#fca5a5;}
+.apc-tlbl{font-size:11px;opacity:.7;margin-bottom:18px;}
+.ret-btn{display:inline-flex;align-items:center;gap:7px;padding:11px 22px;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.4);border-radius:var(--rmd);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--fb);transition:all .2s;backdrop-filter:blur(8px);}
+.ret-btn:hover{background:rgba(255,255,255,.3);}
+/* settings */
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rmd);margin-bottom:8px;}
+.s-row h4{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:2px;}
+.s-row p{font-size:11.5px;color:var(--tm);}
+.tog{width:40px;height:22px;border-radius:999px;background:var(--bdr);cursor:pointer;position:relative;transition:background .25s;border:1.5px solid var(--bds);flex-shrink:0;}
+.tog.on{background:var(--p6);border-color:var(--p7);}
+.tok{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .25s;}
+.tog.on .tok{left:18px;}
+/* toast */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--rmd);padding:10px 16px;font-size:13px;font-weight:500;color:var(--t1);box-shadow:var(--slg);display:flex;align-items:center;gap:9px;z-index:999;opacity:0;pointer-events:none;transition:all .3s;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.td{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+</style>
+</head>
+<body>
 
+<aside class="sb" id="sb">
+  <div class="sb-brand">
+    <div class="sb-icon"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+    <div><div class="sb-name">Outpass</div><div class="sb-school" id="sb-school">Lincoln High</div></div>
+  </div>
+  <nav class="sb-nav" id="sb-nav"></nav>
+  <div class="sb-user">
+    <div class="su-av" id="su-av">AJ</div>
+    <div class="su-info"><div class="su-n" id="su-n">Loading</div><div class="su-r" id="su-r">—</div></div>
+    <button class="lo-btn" onclick="logout()" title="Sign out"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="tb-title" id="tb-title">Dashboard</div>
+    <div class="tb-r">
+      <div class="tb-clk" id="tb-clk"></div>
+      <button class="ibtn" id="themeToggle">
+        <svg id="i-sun" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+        <svg id="i-moon" style="display:none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+    </div>
+  </header>
+  <div class="content" id="content"></div>
+</div>
+
+<div class="toast" id="toast"><div class="td" id="td" style="background:#22c55e"></div><span id="tm"></span></div>
+
+<script>
+// ── Auth guard ──
+const S = JSON.parse(localStorage.getItem('op-session')||'null');
+if(!S){window.location.href='auth.html';}
+const role=S.role;
+
+// ── Theme ──
+const H=document.documentElement,sv=localStorage.getItem('outpass-theme')||'light';
+H.setAttribute('data-theme',sv);si(sv);
+document.getElementById('themeToggle').onclick=()=>{const n=H.getAttribute('data-theme')==='light'?'dark':'light';H.setAttribute('data-theme',n);localStorage.setItem('outpass-theme',n);si(n);};
+function si(t){document.getElementById('i-sun').style.display=t==='dark'?'none':'block';document.getElementById('i-moon').style.display=t==='dark'?'block':'none';}
+
+// ── Clock ──
+function tick(){const d=new Date(),h=d.getHours(),m=d.getMinutes(),ap=h>=12?'PM':'AM',hh=h%12||12;document.getElementById('tb-clk').textContent=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+', '+hh+':'+String(m).padStart(2,'0')+' '+ap;}
+tick();setInterval(tick,10000);
+
+// ── User ──
+document.getElementById('su-n').textContent=S.firstName+' '+S.lastName;
+document.getElementById('su-r').textContent=role;
+document.getElementById('su-av').textContent=(S.firstName[0]+S.lastName[0]).toUpperCase();
+document.getElementById('sb-school').textContent=S.school||'Lincoln High School';
+function logout(){localStorage.removeItem('op-session');window.location.href='auth.html';}
+
+// ── Toast ──
+let _tt;
+function toast(msg,col='#22c55e'){const t=document.getElementById('toast');document.getElementById('tm').textContent=msg;document.getElementById('td').style.background=col;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),3000);}
+
+// ── Pass data ──
+let passes=[
+  {id:1,student:'Alex Johnson',dest:'Restroom',room:'204',ts:Date.now()-11*60000,status:'active',color:'linear-gradient(135deg,#7c3aed,#a855f7)',init:'AJ'},
+  {id:2,student:'Sofia Martinez',dest:"Nurse's Office",room:'118',ts:Date.now()-7*60000,status:'active',color:'linear-gradient(135deg,#0ea5e9,#38bdf8)',init:'SM'},
+  {id:3,student:'Tyler Williams',dest:'Library',room:'301',ts:Date.now()-14*60000,status:'returned',color:'linear-gradient(135deg,#10b981,#34d399)',init:'TW'},
+  {id:4,student:'Marcus Lee',dest:'Counselor',room:'102',ts:Date.now()-3*60000,status:'active',color:'linear-gradient(135deg,#f59e0b,#fbbf24)',init:'ML'},
+];
+let pidC=10,cancelled=0,total=87;
+function fe(ms){const s=Math.floor(ms/1000),m=Math.floor(s/60);return m>0?m+'m '+s%60+'s':s+'s';}
+function greet(){const h=new Date().getHours();return h<12?'morning':h<17?'afternoon':'evening';}
+
+// ── Nav configs ──
+const SVG={
+  grid:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+  doc:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
+  users:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
+  bell:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>',
+  bar:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>',
+  cog:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>',
+  clk:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+  sh:'<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>',
+};
+const NAV={
+  administrator:[{s:'Main',i:[{id:'overview',ic:'grid',l:'Overview'},{id:'passes',ic:'doc',l:'All Passes'},{id:'students',ic:'users',l:'Students'},{id:'alerts',ic:'bell',l:'Alerts',b:2},{id:'reports',ic:'bar',l:'Reports'}]},{s:'System',i:[{id:'settings',ic:'cog',l:'Settings'}]}],
+  teacher:[{s:'Main',i:[{id:'overview',ic:'grid',l:'My Classes'},{id:'passes',ic:'doc',l:'Active Passes'},{id:'history',ic:'clk',l:'History'}]},{s:'System',i:[{id:'settings',ic:'cog',l:'Settings'}]}],
+  student:[{s:'Main',i:[{id:'overview',ic:'grid',l:'My Pass'},{id:'history',ic:'clk',l:'My History'}]},{s:'Info',i:[{id:'rules',ic:'sh',l:'School Rules'}]}],
+};
+
+let curV='overview';
+function buildNav(){
+  const nav=document.getElementById('sb-nav');nav.innerHTML='';
+  (NAV[role]||[]).forEach(sec=>{
+    const t=document.createElement('div');t.className='nst';t.textContent=sec.s;nav.appendChild(t);
+    sec.i.forEach(item=>{
+      const el=document.createElement('div');el.className='ni'+(item.id===curV?' on':'');
+      el.innerHTML=SVG[item.ic]+item.l+(item.b?'<span class="nbadge" id="nb-'+item.id+'">'+item.b+'</span>':'');
+      el.onclick=()=>go(item.id);nav.appendChild(el);
+    });
+  });
+}
+
+function go(id){curV=id;buildNav();render(id);}
+
+const TITLES={overview:'Overview',passes:'Passes',students:'Students',alerts:'Alerts',reports:'Reports',settings:'Settings',history:'History',rules:'School Rules'};
+function render(id){
+  document.getElementById('tb-title').textContent=TITLES[id]||id;
+  const el=document.getElementById('content');
+  if(role==='administrator') rAdmin(id,el);
+  else if(role==='teacher')  rTeacher(id,el);
+  else                       rStudent(id,el);
+}
+
+// ════════════════ ADMIN ════════════════
+function rAdmin(id,el){
+  const active=passes.filter(p=>p.status==='active');
+  if(id==='overview'){
+    el.innerHTML=`
+      <div class="pgh"><div><h2>Good ${greet()}, ${S.firstName} 👋</h2><p>${S.school} · Live dashboard</p></div><button class="ab a-primary" onclick="go('passes')">View All Passes →</button></div>
+      <div class="sg">
+        <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:rgba(147,51,234,.1)">${SVG.users}</div><span class="sc-trend t-up">+${active.length}</span></div><div class="sc-val" style="color:var(--p6)">${active.length}</div><div class="sc-lbl">Out now</div></div>
+        <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:rgba(34,197,94,.1)">${SVG.doc}</div><span class="sc-trend t-neu">avg 82</span></div><div class="sc-val">${total}</div><div class="sc-lbl">Passes today</div></div>
+        <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:rgba(245,158,11,.1)">${SVG.clk}</div><span class="sc-trend t-up">↓ better</span></div><div class="sc-val">6.2m</div><div class="sc-lbl">Avg duration</div></div>
+        <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:rgba(239,68,68,.1)">${SVG.bell}</div><span class="sc-trend t-dn">2 new</span></div><div class="sc-val" style="color:#dc2626">2</div><div class="sc-lbl">Alerts</div></div>
+      </div>
+      <div class="g2">
+        <div class="panel"><div class="ph"><span class="pt">Active passes</span><span class="live-pill"><span class="ld"></span>Live</span></div><div class="pb" id="all">${rList(active,true)}</div></div>
+        <div class="panel"><div class="ph"><span class="pt">Passes this week</span></div><div class="pb"><div class="mc"><div class="mb" style="height:60%"></div><div class="mb" style="height:75%"></div><div class="mb" style="height:50%"></div><div class="mb" style="height:82%"></div><div class="mb td" style="height:100%"></div></div><div class="cl"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span></div></div></div>
+      </div>`;
+  }else if(id==='passes'){
+    el.innerHTML=`<div class="pgh"><div><h2>All Passes</h2><p>Every pass today</p></div><button class="ab a-primary" onclick="adminIssue()">+ Issue Pass</button></div>
+      <div class="panel"><div class="pb" style="padding:0"><table class="tbl"><thead><tr><th>Student</th><th>Destination</th><th>Room</th><th>Duration</th><th>Status</th><th>Action</th></tr></thead><tbody>${rAllRows()}</tbody></table></div></div>`;
+  }else if(id==='students'){
+    const studs=[{n:'Alex Johnson',g:'10th',i:'AJ',c:'linear-gradient(135deg,#7c3aed,#a855f7)',p:8,a:'7m',s:'out'},{n:'Sofia Martinez',g:'10th',i:'SM',c:'linear-gradient(135deg,#0ea5e9,#38bdf8)',p:3,a:'5m',s:'out'},{n:'Tyler Williams',g:'10th',i:'TW',c:'linear-gradient(135deg,#10b981,#34d399)',p:2,a:'9m',s:'in'},{n:'Marcus Lee',g:'10th',i:'ML',c:'linear-gradient(135deg,#f59e0b,#fbbf24)',p:12,a:'8m',s:'out'},{n:'David Kim',g:'10th',i:'DK',c:'linear-gradient(135deg,#6366f1,#818cf8)',p:5,a:'6m',s:'in'},{n:'Mia Chen',g:'10th',i:'MC',c:'linear-gradient(135deg,#16a34a,#4ade80)',p:1,a:'4m',s:'in'}];
+    el.innerHTML=`<div class="pgh"><div><h2>Students</h2><p>Pass activity this week</p></div></div><div class="panel"><div class="pb" style="padding:0"><table class="tbl"><thead><tr><th>Student</th><th>Grade</th><th>This Week</th><th>Avg</th><th>Status</th></tr></thead><tbody>${studs.map(s=>`<tr><td><span class="tbl-name"><span class="mav" style="background:${s.c}">${s.i}</span>${s.n}</span></td><td>${s.g}</td><td><span class="badge ${s.p>=8?'bc':s.p>=4?'bp':'ba'}">${s.p} passes</span></td><td>${s.a}</td><td>${s.s==='out'?'<span class="badge ba">Out now</span>':'<span style="font-size:10px;color:var(--tm)">In class</span>'}</td></tr>`).join('')}</tbody></table></div></div>`;
+  }else if(id==='alerts'){
+    el.innerHTML=`<div class="pgh"><div><h2>Safety Alerts</h2><p>Real-time notifications</p></div></div>
+      <div style="display:flex;flex-direction:column;gap:10px;max-width:640px" id="al">
+        <div id="a1" style="display:flex;align-items:flex-start;gap:11px;padding:13px 15px;border-radius:var(--rmd);background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2)"><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px">⚠️ Alex Johnson — 18 min in hallway</div><div style="font-size:11.5px;color:var(--t2)">Restroom · Room 204 · Exceeded 15-min threshold</div></div><button class="ab" style="background:var(--bg2);color:var(--tm);border:1px solid var(--bdr);white-space:nowrap" onclick="dimAlert('a1')">Dismiss</button></div>
+        <div id="a2" style="display:flex;align-items:flex-start;gap:11px;padding:13px 15px;border-radius:var(--rmd);background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2)"><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px">🔔 Marcus Lee — 3rd pass today</div><div style="font-size:11.5px;color:var(--t2)">Unusual frequency · May need counselor follow-up</div></div><button class="ab" style="background:var(--bg2);color:var(--tm);border:1px solid var(--bdr);white-space:nowrap" onclick="dimAlert('a2')">Dismiss</button></div>
+      </div><div id="ae" style="display:none;text-align:center;padding:40px 0;color:var(--tm)"><div style="font-size:32px;margin-bottom:8px">✅</div>All clear!</div>`;
+  }else if(id==='reports'){
+    el.innerHTML=`<div class="pgh"><div><h2>Reports</h2><p>Weekly summary</p></div></div>
+      <div class="sg" style="grid-template-columns:repeat(2,1fr);max-width:500px;margin-bottom:22px"><div class="sc"><div class="sc-val">${total}</div><div class="sc-lbl">Passes today</div></div><div class="sc"><div class="sc-val">6.2m</div><div class="sc-lbl">Avg duration</div></div><div class="sc"><div class="sc-val">94%</div><div class="sc-lbl">On-time returns</div></div><div class="sc"><div class="sc-val" style="color:#dc2626">${cancelled}</div><div class="sc-lbl">Cancelled</div></div></div>
+      <div class="panel" style="max-width:440px"><div class="ph"><span class="pt">Top Destinations</span></div><div class="pb"><div class="bc-wrap">${[['Restroom',78,142],['Library',52,94],['Nurse',34,62],['Office',22,40],['Counselor',14,26]].map(([l,p,c])=>`<div class="br-row"><div class="bl">${l}</div><div class="bt"><div class="bf" style="width:0" data-w="${p}%"></div></div><div class="bct">${c}</div></div>`).join('')}</div></div></div>`;
+    setTimeout(()=>el.querySelectorAll('.bf').forEach(b=>{b.style.width=b.dataset.w;}),60);
+  }else if(id==='settings') rSettings(el);
+}
+
+function rList(active,withCancel){
+  if(!active.length) return '<div style="text-align:center;padding:18px;color:var(--tm);font-size:13px">No active passes right now</div>';
+  return active.map(p=>`<div class="pr"><div class="pav" style="background:${p.color}">${p.init}</div><div class="pi"><div class="pn">${p.student}</div><div class="pm">${p.dest} · Room ${p.room}</div></div><div class="ptm">${fe(Date.now()-p.ts)}</div><span class="badge ba">Active</span>${withCancel?`<button class="ab a-cancel" onclick="cp(${p.id})">Cancel</button>`:''}</div>`).join('');
+}
+
+function rAllRows(){
+  return [...passes].sort((a,b)=>b.ts-a.ts).map(p=>`<tr><td><span class="tbl-name"><span class="mav" style="background:${p.color}">${p.init}</span>${p.student}</span></td><td>${p.dest}</td><td>${p.room}</td><td>${fe(Date.now()-p.ts)}</td><td><span class="badge ${p.status==='active'?'ba':p.status==='returned'?'br':'bc'}">${p.status}</span></td><td>${p.status==='active'?`<button class="ab a-cancel" onclick="cp(${p.id})">Cancel</button>`:'—'}</td></tr>`).join('');
+}
+
+function cp(id){const p=passes.find(x=>x.id===id);if(!p||p.status!=='active')return;p.status='cancelled';cancelled++;total++;render(curV);toast('Pass cancelled for '+p.student,'#ef4444');}
+function adminIssue(){const ns=['Jordan Park','Priya Sharma','Ethan Brooks','Lucas Ortega'],ds=['Restroom','Library',"Nurse's Office",'Main Office'],n=ns[Math.floor(Math.random()*ns.length)],d=ds[Math.floor(Math.random()*ds.length)];pidC++;passes.push({id:pidC,student:n,dest:d,room:String(Math.floor(Math.random()*400)+100),ts:Date.now(),status:'active',color:'linear-gradient(135deg,#ec4899,#f472b6)',init:n.split(' ').map(x=>x[0]).join('')});total++;render(curV);toast('Pass issued for '+n+' → '+d,'#22c55e');}
+function dimAlert(id){const el=document.getElementById(id);el.style.opacity='0';el.style.transform='translateX(20px)';el.style.transition='all .3s';setTimeout(()=>{el.remove();if(!document.querySelectorAll('#al > div').length)document.getElementById('ae').style.display='block';toast('Alert dismissed','#6366f1');},320);}
+
+// ════════════════ TEACHER ════════════════
+function rTeacher(id,el){
+  const active=passes.filter(p=>p.status==='active');
+  if(id==='overview'||id==='passes'){
+    el.innerHTML=`<div class="pgh"><div><h2>Ms. Rivera's Class — Period 4</h2><p>${active.length} student${active.length!==1?'s':''} out</p></div><button class="ab a-primary" onclick="tIssue()">+ Issue Pass</button></div>
+      <div class="sg" style="grid-template-columns:repeat(3,1fr)"><div class="sc"><div class="sc-val" style="color:var(--p6)">${active.length}</div><div class="sc-lbl">Out now</div></div><div class="sc"><div class="sc-val">${passes.filter(p=>p.status==='returned').length}</div><div class="sc-lbl">Returned</div></div><div class="sc"><div class="sc-val" style="color:#dc2626">${cancelled}</div><div class="sc-lbl">Cancelled</div></div></div>
+      <div class="panel"><div class="ph"><span class="pt">Active passes</span><span class="live-pill"><span class="ld"></span>Live</span></div><div class="pb">${rList(active,true)}</div></div>`;
+  }else if(id==='history'){
+    el.innerHTML=`<div class="pgh"><div><h2>Pass History</h2><p>All passes today</p></div></div><div class="panel"><div class="pb" style="padding:0"><table class="tbl"><thead><tr><th>Student</th><th>Destination</th><th>Duration</th><th>Status</th></tr></thead><tbody>${[...passes].sort((a,b)=>b.ts-a.ts).map(p=>`<tr><td><span class="tbl-name"><span class="mav" style="background:${p.color}">${p.init}</span>${p.student}</span></td><td>${p.dest}</td><td>${fe(Date.now()-p.ts)}</td><td><span class="badge ${p.status==='active'?'ba':p.status==='returned'?'br':'bc'}">${p.status}</span></td></tr>`).join('')}</tbody></table></div></div>`;
+  }else if(id==='settings') rSettings(el);
+}
+function tIssue(){const ns=['Jordan Park','Priya Sharma','Ethan Brooks','Mia Chen'],ds=['Restroom','Library','Water Fountain'],n=ns[Math.floor(Math.random()*ns.length)],d=ds[Math.floor(Math.random()*ds.length)];pidC++;passes.push({id:pidC,student:n,dest:d,room:'204',ts:Date.now(),status:'active',color:'linear-gradient(135deg,#8b5cf6,#c4b5fd)',init:n.split(' ').map(x=>x[0]).join('')});total++;render(curV);toast('Pass issued for '+n+' → '+d,'#22c55e');}
+
+// ════════════════ STUDENT ════════════════
+let sDest=null,sPass=null,sTmr=null;
+const DESTS=[{e:'🚻',l:'Restroom'},{e:'🏥',l:"Nurse's Office"},{e:'📚',l:'Library'},{e:'🏫',l:'Main Office'},{e:'💬',l:'Counselor'},{e:'💧',l:'Water Fountain'}];
+
+function rStudent(id,el){
+  if(id==='overview'){
+    if(sPass&&sPass.status==='active'){rActivePass(el);}
+    else{rRequestForm(el);}
+  }else if(id==='history'){
+    const hist=[{dest:'Restroom',dur:'4m 12s',date:'Today, 9:14 AM',st:'returned'},{dest:'Library',dur:'8m 05s',date:'Today, 11:30 AM',st:'returned'},{dest:"Nurse's Office",dur:'15m 22s',date:'Yesterday',st:'returned'}];
+    el.innerHTML=`<div class="pgh"><div><h2>My History</h2><p>Your recent passes</p></div></div><div class="panel"><div class="pb" style="padding:0"><table class="tbl"><thead><tr><th>Destination</th><th>Duration</th><th>Date</th><th>Status</th></tr></thead><tbody>${hist.map(h=>`<tr><td>${h.dest}</td><td>${h.dur}</td><td>${h.date}</td><td><span class="badge br">${h.st}</span></td></tr>`).join('')}${sPass?`<tr><td>${sPass.dest}</td><td>Active</td><td>Today</td><td><span class="badge ba">active</span></td></tr>`:''}</tbody></table></div></div>`;
+  }else if(id==='rules'){
+    el.innerHTML=`<div class="pgh"><div><h2>School Rules</h2><p>Lincoln High pass policy</p></div></div><div class="panel" style="max-width:560px"><div class="pb" style="display:flex;flex-direction:column;gap:13px">${[['⏱','15-minute limit','All passes are limited to 15 minutes. Your teacher is notified automatically.'],['📍','Stay on route','Go directly to your destination and return immediately.'],['🔁','Return promptly','Tap Return when you\'re back in class.'],['👀','Be accountable','Staff may ask to see your digital pass at any time.']].map(([e,t,d])=>`<div style="display:flex;gap:11px;align-items:flex-start"><div style="font-size:20px">${e}</div><div><div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px">${t}</div><div style="font-size:12.5px;color:var(--t2);line-height:1.6">${d}</div></div></div>`).join('')}</div></div>`;
+  }
+}
+
+function rRequestForm(el){
+  sDest=null;
+  el.innerHTML=`<div class="pgh"><div><h2>Request a Hall Pass</h2><p>Hi ${S.firstName}! Where are you headed?</p></div></div>
+    <div style="max-width:520px"><div class="panel"><div class="ph"><span class="pt">Choose destination</span></div><div class="pb">
+      <div class="dest-grid">${DESTS.map(d=>`<div class="db" onclick="selDest(this,'${d.l}')"><div class="de">${d.e}</div><div class="dl">${d.l}</div></div>`).join('')}</div>
+      <div class="ff"><label class="fl">Note (optional)</label><textarea class="fi fte" id="pnote" rows="2" placeholder="e.g. I'll be right back…"></textarea></div>
+      <button class="big-btn" id="req-btn" disabled onclick="sRequest()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width:15px;height:15px"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Request Pass</button>
+    </div></div></div>`;
+}
+
+function selDest(el,dest){document.querySelectorAll('.db').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');sDest=dest;document.getElementById('req-btn').disabled=false;}
+
+function sRequest(){
+  if(!sDest)return;
+  const note=document.getElementById('pnote')?.value||'';
+  pidC++;sPass={id:pidC,dest:sDest,note,ts:Date.now(),status:'active'};
+  passes.push({id:pidC,student:S.firstName+' '+S.lastName,dest:sDest,room:'204',ts:Date.now(),status:'active',color:'linear-gradient(135deg,var(--p6),var(--p4))',init:(S.firstName[0]+S.lastName[0]).toUpperCase()});
+  total++;render('overview');toast('Pass issued → '+sDest,'#22c55e');
+  startTmr();
+}
+
+function rActivePass(el){
+  const el2=Date.now()-sPass.ts,rem=Math.max(0,15*60000-el2);
+  const m=Math.floor(rem/60000),sec=Math.floor((rem%60000)/1000),urg=rem<60000;
+  const d=new Date(sPass.ts),h=d.getHours(),mn=d.getMinutes(),ap=h>=12?'PM':'AM';
+  const ia=`${h%12||12}:${String(mn).padStart(2,'0')} ${ap}`;
+  const lp=passes.find(p=>p.id===sPass.id);
+  const canc=lp&&lp.status==='cancelled';
+  el.innerHTML=`<div class="pgh"><div><h2>Pass Active</h2><p>Remember to return on time!</p></div></div>
+    <div class="apc" style="max-width:500px"><div class="apc-bg"></div><div class="apc-c">
+      <div class="apc-lbl">🎓 Hall Pass · ${S.school}</div>
+      <div class="apc-title">${S.firstName} ${S.lastName}</div>
+      <div class="apc-sub">Period 4 · Ms. Rivera · Room 204</div>
+      <div class="apc-details">
+        <div class="apc-d"><div class="apc-dl">Destination</div><div class="apc-dv">📍 ${sPass.dest}</div></div>
+        <div class="apc-d"><div class="apc-dl">Issued at</div><div class="apc-dv">🕒 ${ia}</div></div>
+      </div>
+      ${canc?`<div style="background:rgba(239,68,68,.25);border:1.5px solid rgba(255,255,255,.35);border-radius:10px;padding:12px 16px;font-size:13px;font-weight:700;margin-bottom:16px">⚠️ Teacher cancelled this pass. Return immediately.</div>`:
+        `<div class="apc-timer ${urg?'urg':''}" id="stmr">${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}</div>
+         <div class="apc-tlbl" id="stlbl" style="margin-bottom:16px">${urg?'⚠️ Return now!':'remaining'}</div>`}
+      <button class="ret-btn" onclick="sReturn()"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>I'm Back — Return Pass</button>
+    </div></div>
+    ${sPass.note?`<div class="panel" style="max-width:500px;margin-top:16px"><div class="pb"><strong>Your note:</strong> ${sPass.note}</div></div>`:''}`;
+}
+
+function startTmr(){
+  clearInterval(sTmr);
+  sTmr=setInterval(()=>{
+    if(!sPass||sPass.status!=='active'){clearInterval(sTmr);return;}
+    const lp=passes.find(p=>p.id===sPass.id);
+    if(lp&&lp.status==='cancelled'){sPass.status='cancelled';render('overview');clearInterval(sTmr);return;}
+    const rem=Math.max(0,15*60000-(Date.now()-sPass.ts));
+    const m=Math.floor(rem/60000),s=Math.floor((rem%60000)/1000);
+    const te=document.getElementById('stmr');if(!te){clearInterval(sTmr);return;}
+    te.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    te.className='apc-timer'+(rem<60000?' urg':'');
+    const tl=document.getElementById('stlbl');if(tl)tl.textContent=rem===0?'⏰ Time up!':rem<60000?'⚠️ Return now!':'remaining';
+  },1000);
+}
+
+function sReturn(){
+  clearInterval(sTmr);
+  const dur=fe(Date.now()-sPass.ts);
+  const lp=passes.find(p=>p.id===sPass.id);if(lp)lp.status='returned';
+  sPass=null;sDest=null;render('overview');toast('Welcome back! Out for '+dur,'#22c55e');
+}
+
+// ════════════════ SETTINGS ════════════════
+function rSettings(el){
+  const togs=[{l:'Auto-approve trusted students',d:'Passes auto-issued for good-standing students',on:true},{l:'Safety alerts at 15 min',d:'Notify staff when pass exceeds 15 minutes',on:true},{l:'Email daily digest',d:'Summary of pass activity each evening',on:true},{l:'Concurrent pass limit',d:'Max 2 students out per class at once',on:false}];
+  el.innerHTML=`<div class="pgh"><div><h2>Settings</h2><p>Preferences &amp; account</p></div></div>
+    <div style="max-width:560px">
+      <div style="font-size:14px;font-weight:700;color:var(--t1);margin-bottom:12px">Account</div>
+      <div class="s-row"><div class="s-info"><h4>${S.firstName} ${S.lastName}</h4><p>${S.email||'demo@outpass.school'} · ${role}</p></div><button class="ab a-cancel" onclick="logout()">Sign out</button></div>
+      <div style="font-size:14px;font-weight:700;color:var(--t1);margin:18px 0 12px">Preferences</div>
+      ${togs.map((t,i)=>`<div class="s-row"><div><h4>${t.l}</h4><p>${t.d}</p></div><div class="tog ${t.on?'on':''}" id="tog${i}" onclick="this.classList.toggle('on');toast(this.classList.contains('on')?'${t.l.substring(0,20)}… enabled':'…disabled',this.classList.contains('on')?'#22c55e':'#6366f1')"><div class="tok"></div></div></div>`).join('')}
+    </div>`;
+}
+
+// ── Init ──
+buildNav();render('overview');
+</script>
+</body>
+</html>
